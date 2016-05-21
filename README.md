@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 
      ,-----.,--.                  ,--. ,---.   ,--.,------.  ,------.
     '  .--./|  | ,---. ,--.,--. ,-|  || o   \  |  ||  .-.  \ |  .---'
@@ -41,7 +40,3 @@ https://docs.djangoproject.com/en/1.9/intro/tutorial01/
 
 Visit http://docs.c9.io for support, or to learn more about using Cloud9 IDE.
 To watch some training videos, visit http://www.youtube.com/user/c9ide
-=======
-# charsheets
-Better character sheets for D&amp;D
->>>>>>> ea76d6d9c1d96d5906ea3555715ec42d0472cf8f
