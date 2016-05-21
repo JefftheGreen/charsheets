@@ -80,6 +80,11 @@ class Effect(models.Model):
     # The owner of the effect. This is so the effect can be re-used in multiple
     # sheets.
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    # Effects active on the character. Modify stats and also visible to user
+    sheet = models.ForeignKey('Sheet', null=True, default=None)
+    # Whether the effect is active. If not, it's not factored into the
+    # character sheet
+    active = models.BooleanField(default=True)
     # The effect's name. This is displayed on the sheet.
     name = models.CharField(max_length=200)
     # The effect's description. This is displayed on the sheet.
@@ -109,8 +114,6 @@ class Effect(models.Model):
     # in SAVE_CHOICES
     save_bonus = models.IntegerField(choices=SAVE_CHOICES, default=None, 
                                      null=True)
-    # Effects active on the character. Modify stats and also visible to user
-    sheets = models.ManyToManyField('Sheet')
     
     
     def total_ability_bonus(self, ability):
@@ -135,7 +138,7 @@ class Effect(models.Model):
     
     
     def total_skill_bonus(self, skill):
-        if type(skill) = int:
+        if type(skill) == int:
             skill = Skill.objects.get(id=skill)
         bonus = []
         # Only add if this effect has a bonus to the specified skill

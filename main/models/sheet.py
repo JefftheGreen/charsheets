@@ -278,6 +278,40 @@ class Sheet(models.Model):
     def fin_ability_mods(self):
         return (self.fin_str_mod, self.fin_dex_mod, self.fin_con_mod,
                 self.fin_int_mod, self.fin_wis_mod, self.fin_cha_mod)
+    
+    @property
+    def active_effects(self):
+        raw_effects = self.effect_set.filter(active=True)
+        
+                
+    def effect_ability_bonus(self, ability, effect):
+        raw_bonuses = effect.total_skill_bonus(skill)
+        # Bonuses are stored as bonus_type: bonus. bonus_type is an integer
+        # referring to the bonus types in Effect. bonus is a range with min
+        # equal to the worst penalty and a max equal to the best bonus.
+        # Remember when setting ranges that the max is set to the second
+        # argument _minus one_, so you need to make it one higher.
+        bonuses = {}
+        for bonus_type, amount in raw_bonuses:
+            if bonus_type in bonuses:
+                old_bonus = bonuses[bonus_type]
+                # If amount is a penalty and worse than the old one, use it
+                if amount < min(old_bonus):
+                    bonuses[bonus_type] = range(amount, max(old_bonus) + 1)
+                # If amount is a bonus and better than the old one, use it
+                elif amount > max(old_bonus):
+                    bonuses[bonus_type] = range(min(old_bonus), amount + 1)
+            else:
+                # If amount is a bonus, set penalty to 0 and bonus to amount
+                if amount > 0:
+                    bonuses[bonus_type] = range(0, amount + 1)
+                # If amount is a penalty, set penalty to amount and bonus to 0
+                elif amount < 0:
+                    bonuses[bonus_type] = range(amount, 1)
+                # This shouldn't happen
+                else:
+                    bonuses[bonus_type] = range(0, 1)
+        return bonuses
                 
     def effect_skill_bonus(self, skill, effect):
         raw_bonuses = effect.total_skill_bonus(skill)
