@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Log in</title>
+	</head>
+	<body>
+		<div id="Title">
+			<h1>Log in</h1>
+		</div>
+		{% if error %}
+		<div id="Error">
+			<h2>Your password and username do not match.</h2>
+		</div>
+		{% endif %}
+		<form id="login" action="/login/" method="post">
+			{% csrf_token %}
+			{{ form.as_p }}
+			<input type="submit" value="Log In" />
+		</form>
+	</body>
+</html>

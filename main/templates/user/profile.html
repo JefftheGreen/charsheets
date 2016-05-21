@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ user }}</title>
+    </head>
+    <body>
+        <h1>{{ user }}</h1>
+        <div id="sheet list">
+            <ul>
+            {% for sheet in sheet_list %}
+                <li>{{ sheet.name }} (3.5e)</li>
+            {% empty %}
+                You have no sheets.
+            {% endfor %}
+            </ul>
+        </div>
+        <form id="login" action="/profile/" method="post">
+			{% csrf_token %}
+			{{ form.as_table }}
+			<input type="submit" value="New Sheet" />
+		</form>
+    </body>
+</html>

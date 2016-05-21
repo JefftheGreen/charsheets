@@ -1,0 +1,59 @@
+http://www.nomnoml.com/
+
+#title: Character Sheets
+#bendSize: 0.5
+#edges: rounded
+#direction: right
+
+[user|id:int;username:str]
+
+[sheet|id:int;name:str;
+char_name:str;
+base_str:int;base_dex:int;base_con:int;
+base_int:int;base_wis:int;base_cha:int;
+skill_ranks:dict; skill_stat_override:dict|
+str():int;dex():int;con():int;
+int():int;wis():int;cha():int;
+ac():int;skill_bonuses():ary;
+total_skill_bonuses():ary]
+
+[feat|name:str;description:str]
+
+[effect|id:int;name:str;description:str;
+bonuses:ary;x_to_y:ary]
+
+[skill|id:int;default_stat:int]
+
+[condition|id:int;description:str;
+bonuses:ary]
+
+[container|id:int;name:str;
+max_items:int;max_weight:float]
+
+[spellbook|id:int;type:int;class:str;dc_stat:int;
+bonus_spells_stat:int;base_pp:int;spells_per_day:ary;
+spells_known:ary]
+
+[item|type:int;damage:str;critical:str;range:str;
+weight:str;size:str;damage_type:str;base_ac_bonus:int;
+base_acp:int;base_asf:int;weapon_enhancement_bonus:int;
+armor_enhancement_bonus:int]
+
+[property]
+
+[condition]->[sheet]
+[skill]->*[sheet]
+[skill]->*[effect]
+[feat]*-+[sheet]
+[effect]*-+1[feat]
+[effect]*-+1[user]
+[effect]*-+1[sheet]
+[effect]*-+1[property]
+[container]3..*-+1[sheet]
+[item]*-+1[container]
+[item]*-+1[user]
+[property]*-+1[item]
+[sheet]*-+1[user]
+[spellbook]*-+1[sheet]
+[spell]*-+1[user]
+[spell]*->*[spellbook]

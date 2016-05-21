@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Register</title>
+	</head>
+	<body>
+		<div id="Title">
+			<h1>Register</h1>
+		</div>
+		{% if permission_error %}
+		<div id="Permission Error">
+			<h2>
+				This website is by invitation only and your username is not on
+				the allowed list. Check that you've used the correct name.
+			.</h2>
+		</div>
+		{% endif %}
+		{% if duplicate_error %}
+		<div id="Duplicate Error">
+			<h2>This username has alreayd been registered.</h2>
+		</div>
+		{% endif %}
+		<form id="login" action="/register/" method="post">
+			{% csrf_token %}
+			{{ form.as_p }}
+			<input type="submit" value="Log In" />
+		</form>
+	</body>
+</html>

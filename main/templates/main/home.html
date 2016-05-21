@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Character Sheet Home</title>
+    </head>
+    <body>
+        <h1>Default Skills</h1>
+        <div id="SkillList">
+            <ul>
+            {% for skill, subskills in skills %}
+                <li>
+                    {{ skill }} ({{ skill.get_default_stat_display }})
+                </li>
+                <ul>
+                {% for subskill in subskills %}
+                    <li>
+                        {{ subskill.name }} 
+                        ({{ subskill.get_default_stat_display }})
+                    </li>
+                {% endfor %}
+                </ul>
+            {% endfor %}
+            </ul>
+        </div>
+    </body>
+</html>

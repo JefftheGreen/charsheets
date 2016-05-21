@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Password Reset</title>
+    </head>
+    <body>
+        {% if pwderror %}
+        <div id="wrong password">
+            <h1>Your old password was incorrect</h1>
+        </div>
+        {% elif matcherror %}
+        <div id="no match">
+            <h1>Passwords must match.</h1>
+        </div>
+        {% endif %}
+	    <form id="reset" action="/password_reset/" method="post">
+		    {% csrf_token %}
+		    {{ form.as_p }}
+		    <input type="submit" value="Reset" />
+	    </form>
+    </body>
+</html>
