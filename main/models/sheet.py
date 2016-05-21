@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 class Sheet(models.Model):
     
     # The user that created the sheet
@@ -43,75 +44,74 @@ class Sheet(models.Model):
     disp_base_ref = models.CharField(max_length=5)
     # The character's Fort, displayed on the sheet, and parsed for calculations
     disp_base_fort = models.CharField(max_length=5)
-    
         
-    # The character's base Str, used in calculations
+    # The character's base Str, used in calculations. integer
     @property
     def base_str(self):
         try:
             return max(0, int(self.disp_base_str))
-        except:
+        except ValueError:
             try:
                 return float(self.disp_base_str)
-            except:
+            except ValueError:
                 return None
     
-    # The character's base Dex, used in calculations
+    # The character's base Dex, used in calculations. integer
     @property
     def base_dex(self):
         try:
             return int(self.disp_base_dex)
-        except:
+        except ValueError:
             try:
                 return float(self.disp_base_dex)
-            except:
+            except ValueError:
                 return None
     
-    # The character's base Con, used in calculations
+    # The character's base Con, used in calculations. integer
     @property
     def base_con(self):
         try:
             return int(self.disp_base_con)
-        except:
+        except ValueError:
             try:
                 return float(self.disp_base_con)
-            except:
+            except ValueError:
                 return None
     
-    # The character's base Int, used in calculations
+    # The character's base Int, used in calculations. integer
     @property
     def base_int(self):
         try:
             return int(self.disp_base_int)
-        except:
+        except ValueError:
             try:
                 return float(self.disp_base_int)
-            except:
+            except ValueError:
                 return None
     
-    # The character's base Wis, used in calculations
+    # The character's base Wis, used in calculations. integer
     @property
     def base_wis(self):
         try:
             return int(self.disp_base_wis)
-        except:
+        except ValueError:
             try:
                 return float(self.disp_base_wis)
-            except:
+            except ValueError:
                 return None
     
-    # The character's base Cha, used in calculations
+    # The character's base Cha, used in calculations. integer
     @property
     def base_cha(self):
         try:
             return int(self.disp_base_cha)
-        except:
+        except ValueError:
             try:
                 return float(self.disp_base_cha)
-            except:
+            except ValueError:
                 return None
     
-    # The character's base Str modifier, calculated from base_str
+    # The character's base Str modifier, calculated from base_str. integer
     @property
     def base_str_mod(self):
         if self.base_str is None:
@@ -119,7 +119,7 @@ class Sheet(models.Model):
         else:
             return int((self.base_str - 10) / 2)
     
-    # The character's base Dex modifier, calculated from base_dex
+    # The character's base Dex modifier, calculated from base_dex. integer
     @property
     def base_dex_mod(self):
         if self.base_dex is None:
@@ -127,7 +127,7 @@ class Sheet(models.Model):
         else:
             return int((self.base_dex - 10) / 2)
      
-    # The character's base Con modifier, calculated from base_con
+    # The character's base Con modifier, calculated from base_con. integer
     @property
     def base_con_mod(self):
         if self.base_con is None:
@@ -135,7 +135,7 @@ class Sheet(models.Model):
         else:
             return int((self.base_con - 10) / 2)
     
-    # The character's base Int modifier, calculated from base_int
+    # The character's base Int modifier, calculated from base_int. integer
     @property
     def base_int_mod(self):
         if self.base_int is None:
@@ -143,7 +143,7 @@ class Sheet(models.Model):
         else:
             return int((self.base_int - 10) / 2)
     
-    # The character's base Wis modifier, calculated from base_wis
+    # The character's base Wis modifier, calculated from base_wis. integer
     @property
     def base_wis_mod(self):
         if self.base_wis is None:
@@ -151,7 +151,7 @@ class Sheet(models.Model):
         else:
             return int((self.base_wis - 10) / 2)
     
-    # The character's base Cha modifier, calculated from base_cha
+    # The character's base Cha modifier, calculated from base_cha. integer
     @property
     def base_cha_mod(self):
         if self.base_cha is None:
@@ -159,67 +159,85 @@ class Sheet(models.Model):
         else:
             return int((self.base_cha - 10) / 2)
             
-    # A 6-tuple of the base abilities for easy reference
+    # All base abilities for easy reference. 6-tuple of integers
     @property
     def base_abilities(self):
         return (self.base_str, self.base_dex, self.base_con,
                 self.base_int, self.base_wis, self.base_cha)
     
-    # A 6-tuple of the base ability modifiers for easy reference        
+    # All base ability modifiers for easy reference. 6-tuple of integers
     @property
     def base_ability_mods(self):
         return (self.base_str_mod, self.base_dex_mod, self.base_con_mod,
                 self.base_int_mod, self.base_wis_mod, self.base_cha_mod)
     
-    # The character's Str, accounting for all effects   
+    # The character's Str, accounting for all effects. integer
     @property
     def fin_str(self):
         fin_str = self.base_str
-        for effect in self.effect_set.all():
-            pass
+        if fin_str is None:
+            return None
+        for bonus_type, modifiers in self.total_ability_bonus(0).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            fin_str += penalty + bonus
         return fin_str
     
-    # The character's Dex, accounting for all effects
+    # The character's Dex, accounting for all effects. integer
     @property
     def fin_dex(self):
         fin_dex = self.base_dex
-        for effect in self.effect_set.all():
-            pass
+        if fin_dex is None:
+            return None
+        for bonus_type, modifiers in self.total_ability_bonus(1).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            fin_dex += penalty + bonus
         return fin_dex
     
-    # The character's Con, accounting for all effects
+    # The character's Con, accounting for all effects. integer
     @property
     def fin_con(self):
         fin_con = self.base_con
-        for effect in self.effect_set.all():
-            pass
+        if fin_con is None:
+            return None
+        for bonus_type, modifiers in self.total_ability_bonus(2).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            fin_con += penalty + bonus
         return fin_con
     
-    # The character's Int, accounting for all effects
+    # The character's Int, accounting for all effects. integer
     @property
     def fin_int(self):
         fin_int = self.base_int
-        for effect in self.effect_set.all():
-            pass
+        if fin_int is None:
+            return None
+        for bonus_type, modifiers in self.total_ability_bonus(3).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            fin_int += penalty + bonus
         return fin_int
     
-    # The character's Wis, accounting for all effects
+    # The character's Wis, accounting for all effects. integer
     @property
     def fin_wis(self):
         fin_wis = self.base_wis
-        for effect in self.effect_set.all():
-            pass
+        if fin_wis is None:
+            return None
+        for bonus_type, modifiers in self.total_ability_bonus(4).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            fin_wis += penalty + bonus
         return fin_wis
     
-    # The character's Cha, accounting for all effects
+    # The character's Cha, accounting for all effects. integer
     @property
     def fin_cha(self):
         fin_cha = self.base_cha
-        for effect in self.effect_set.all():
-            pass
+        if fin_cha is None:
+            return None
+        for bonus_type, modifiers in self.total_ability_bonus(5).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            fin_cha += penalty + bonus
         return fin_cha
     
-    # The character's Str modifier, calculated from fin_str
+    # The character's Str modifier, calculated from fin_str. integer
     @property
     def fin_str_mod(self):
         if self.fin_str is None:
@@ -227,7 +245,7 @@ class Sheet(models.Model):
         else:
             return int((self.fin_str - 10) / 2)
     
-    # The character's Dex modifier, calculated from fin_dex
+    # The character's Dex modifier, calculated from fin_dex. integer
     @property
     def fin_dex_mod(self):
         if self.fin_dex is None:
@@ -235,7 +253,7 @@ class Sheet(models.Model):
         else:
             return int((self.fin_dex - 10) / 2)
     
-    # The character's Con modifier, calculated from fin_con
+    # The character's Con modifier, calculated from fin_con. integer
     @property
     def fin_con_mod(self):
         if self.fin_con is None:
@@ -243,7 +261,7 @@ class Sheet(models.Model):
         else:
             return int((self.fin_con - 10) / 2)
     
-    # The character's Int modifier, calculated from fin_int
+    # The character's Int modifier, calculated from fin_int. integer
     @property
     def fin_int_mod(self):
         if self.fin_int is None:
@@ -251,7 +269,7 @@ class Sheet(models.Model):
         else:
             return int((self.fin_int - 10) / 2)
     
-    # The character's Wis modifier, calculated from fin_wis
+    # The character's Wis modifier, calculated from fin_wis. integer
     @property
     def fin_wis_mod(self):
         if self.fin_wis is None:
@@ -259,7 +277,7 @@ class Sheet(models.Model):
         else:
             return int((self.fin_wis - 10) / 2)
     
-    # The character's Cha modifier, calculated from fin_cha
+    # The character's Cha modifier, calculated from fin_cha. integer
     @property
     def fin_cha_mod(self):
         if self.fin_cha is None:
@@ -267,13 +285,13 @@ class Sheet(models.Model):
         else:
             return int((self.fin_cha - 10) / 2)
     
-    # A 6-tuple of the base abilities for easy reference
+    # All base abilities for easy reference. 6-tuple of integers
     @property
     def fin_abilities(self):
         return (self.fin_str, self.fin_dex, self.fin_con,
                 self.fin_int, self.fin_wis, self.fin_cha)
     
-    # A 6-tuple of the base ability modifiers for easy reference        
+    # All base ability modifiers for easy reference. 6-tuple of integers
     @property
     def fin_ability_mods(self):
         return (self.fin_str_mod, self.fin_dex_mod, self.fin_con_mod,
@@ -281,11 +299,23 @@ class Sheet(models.Model):
     
     @property
     def active_effects(self):
-        raw_effects = self.effect_set.filter(active=True)
-        
-                
+        raw_effects = list(self.effect_set.filter(active=True))
+        feat_effects = []#[f.effect for f in self.feat_set.all()]
+        # TODO: Figure out how to implement item properties here.
+        item_effects = []
+        return raw_effects + feat_effects + item_effects
+
+    # Gets the bonuses and penalties for an ability from a single effect
+    #   ability:
+    #       the ability to get bonuses for. integer (see Effect model).
+    #   effect:
+    #       the effect to get bonuses from. Effect.
+    # Returns a dictionary. Format is {bonus_type: modifiers}. bonus_type
+    # is an integer referring to the bonus type (see models.Effect). modifiers
+    # is a range with minimum equal to the penalty of that type (0 if none)
+    # and a maximum equal to the bonus of that type (0 if none).
     def effect_ability_bonus(self, ability, effect):
-        raw_bonuses = effect.total_skill_bonus(skill)
+        raw_bonuses = effect.total_ability_bonus(ability)
         # Bonuses are stored as bonus_type: bonus. bonus_type is an integer
         # referring to the bonus types in Effect. bonus is a range with min
         # equal to the worst penalty and a max equal to the best bonus.
@@ -312,7 +342,16 @@ class Sheet(models.Model):
                 else:
                     bonuses[bonus_type] = range(0, 1)
         return bonuses
-                
+
+    # Gets the bonuses and penalties for an ability from a single effect
+    #   skill:
+    #       the skill to get bonuses for. Skill or integer refering to Skill id.
+    #   effect:
+    #       the effect to get bonuses from. Effect.
+    # Returns a dictionary. Format is {bonus_type: modifiers}. bonus_type
+    # is an integer referring to the bonus type (see models.Effect). modifiers
+    # is a range with minimum equal to the penalty of that type (0 if none)
+    # and a maximum equal to the bonus of that type (0 if none).
     def effect_skill_bonus(self, skill, effect):
         raw_bonuses = effect.total_skill_bonus(skill)
         # Bonuses are stored as bonus_type: bonus. bonus_type is an integer
@@ -348,4 +387,52 @@ class Sheet(models.Model):
                 # This shouldn't happen
                 else:
                     bonuses[bonus_type] = range(0, 1)
+        return bonuses
+
+    # Gets the ability bonuses of each type from all effects
+    #   ability:
+    #       the ability to get bonuses for. integer (see Effect model).
+    # Returns a dictionary. Format is {bonus_type: modifiers}. bonus_type
+    # is an integer referring to the bonus type (see models.Effect). modifiers
+    # is a range with minimum equal to the penalty of that type (0 if none)
+    # and a maximum equal to the bonus of that type (0 if none).
+    def total_ability_bonus(self, ability):
+        bonuses = {}
+        for effect in self.active_effects:
+            effect_bonuses = self.effect_ability_bonus(ability, effect)
+            for bonus_type in effect_bonuses:
+                penalty = min(effect_bonuses[bonus_type])
+                bonus = max(effect_bonuses[bonus_type])
+                if bonus_type in bonuses:
+                    old_penalty = min(bonuses[bonus_type])
+                    old_bonus = max(bonuses[bonus_type])
+                    worst_penalty = min(old_penalty, penalty)
+                    best_bonus = max(old_bonus, bonus)
+                    bonuses[bonus_type] = range(worst_penalty, best_bonus)
+                else:
+                    bonuses[bonus_type] = range(penalty, bonus + 1)
+        return bonuses
+
+    # Gets the ability bonuses of each type from all effects
+    # skill:
+    #       the skill to get bonuses for. Skill or integer refering to Skill id.
+    # Returns a dictionary. Format is {bonus_type: modifiers}. bonus_type
+    # is an integer referring to the bonus type (see models.Effect). modifiers
+    # is a range with minimum equal to the penalty of that type (0 if none)
+    # and a maximum equal to the bonus of that type (0 if none).
+    def total_skill_bonus(self, skill):
+        bonuses = {}
+        for effect in self.active_effects:
+            effect_bonuses = self.effect_ability_bonus(skill, effect)
+            for bonus_type in effect_bonuses:
+                penalty = min(effect_bonuses[bonus_type])
+                bonus = max(effect_bonuses[bonus_type])
+                if bonus_type in bonuses:
+                    old_penalty = min(bonuses[bonus_type])
+                    old_bonus = max(bonuses[bonus_type])
+                    worst_penalty = min(old_penalty, penalty)
+                    best_bonus = max(old_bonus, bonus)
+                    bonuses[bonus_type] = range(worst_penalty, best_bonus)
+                else:
+                    bonuses[bonus_type] = range(penalty, bonus + 1)
         return bonuses

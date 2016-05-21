@@ -77,13 +77,18 @@ class Effect(models.Model):
                          )
                           
                           
-    # The owner of the effect. This is so the effect can be re-used in multiple
-    # sheets.
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    # Effects active on the character. Modify stats and also visible to user
+    # The owner of the effect. If this is not null, it is available to be
+    # copied to multiple sheets but isn't used in a specific sheet.
+    # This and sheet should not both have non-null values. Both may be null.
+    # For example, when attached to an item or feat, both should be null.
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
+                              default=None)
+    # The sheet the effect is attached to. If this is null, it isn't attached
+    # directly to a character sheet but may affect a character through a feat
+    # or item.
     sheet = models.ForeignKey('Sheet', null=True, default=None)
     # Whether the effect is active. If not, it's not factored into the
-    # character sheet
+    # character sheet.
     active = models.BooleanField(default=True)
     # The effect's name. This is displayed on the sheet.
     name = models.CharField(max_length=200)
@@ -99,8 +104,15 @@ class Effect(models.Model):
     bonus_amount = models.IntegerField(default=None, null=True)
     # If the bonus is equal to an ability modifier, this stores the ability
     # using the values in ABILITY_CHOICES.
-    from_x_stat = models.IntegerField(default=None, choices=ABILITY_CHOICES, 
-                                      null=True)
+    x_to_y_bonus_ability = models.IntegerField(default=None,
+                                               choices=ABILITY_CHOICES,
+                                               null=True)
+    # If the effect replaces an ability score in a calculation instead of
+    # giving a bonus, this stores the ability using the values in
+    # ABILITY_CHOICES.
+    x_to_y_replace_ability = models.IntegerField(default=None,
+                                                 choices=ABILITY_CHOICES,
+                                                 null=True)
     # The bonus type, using the values in BONUS_TYPE_CHOICES
     bonus_type = models.IntegerField()
     # If the bonus goes to a skill, this stores the skill
@@ -110,7 +122,7 @@ class Effect(models.Model):
     # in ABILITY_CHOICES
     ability_bonus = models.IntegerField(choices=ABILITY_CHOICES, default=None, 
                                         null=True)
-    # If the bonus goes to a save, this stores the ability using the values
+    # If the bonus goes to a save, this stores the save using the values
     # in SAVE_CHOICES
     save_bonus = models.IntegerField(choices=SAVE_CHOICES, default=None, 
                                      null=True)
@@ -123,7 +135,7 @@ class Effect(models.Model):
             if self.bonus_amount is not None:
                 bonus.append((self.bonus_type, self.bonus_amount))
             # X to Y on abilities really screws things up
-            elif self.from_x_stat is not None:
+            elif self.x_to_y_bonus_ability is not None:
                 e = "Effect {0} has from_x_stat for an ability.".format(self.id)
                 raise RuntimeError(e)
             # This shouldn't happen
@@ -133,7 +145,7 @@ class Effect(models.Model):
                 warnings.warn(w, RuntimeWarning)
         # Add sub-effect bonuses
         for sub_effect in self.sub_effect.all():
-            bonus += sub_effect.total_ability_bonus(skill)
+            bonus += sub_effect.total_ability_bonus(ability)
         return bonus
     
     
@@ -147,7 +159,7 @@ class Effect(models.Model):
             if self.bonus_amount is not None:
                 bonus.append((self.bonus_type, self.bonus_amount))
             # A bonus equal to an ability score modifier
-            elif self.from_x_stat is not None:
+            elif self.x_to_y_bonus_ability is not None:
                 bonus.append((self.bonus_type, self.get_from_x_stat_display()))
             # This shouldn't happen
             else:
