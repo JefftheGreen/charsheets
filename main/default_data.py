@@ -114,6 +114,7 @@ SKILL_ACP = {"Appraise": 0,
              
 DEFAULT_SKILL_IDS = range(1, 55)
 
+
 def main():
     from .models import Skill
     skill_id = 1

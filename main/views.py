@@ -7,18 +7,22 @@ from django.http import HttpResponse
 from django.conf import settings
 from .models import Sheet, Skill
 
+
 class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
-    
+
+
 class ResetForm(forms.Form):
     old_password = forms.CharField(widget=forms.PasswordInput)
     new_password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)
-    
+
+
 class NewSheetForm(forms.Form):
     name = forms.CharField()
     type = forms.ChoiceField(choices=[['0','D&D 3.5e']])
+
 
 class LoginView(View):
     
@@ -42,6 +46,7 @@ class LoginView(View):
                 form = LoginForm()
                 return render(request, 'login.html', {'error': True, 
                                                       'form': form})
+
 
 class NewUserView(View):
     
@@ -70,7 +75,8 @@ class NewUserView(View):
                 new_user = User.objects.create_user(username, password=password)
                 return redirect('/login/')
             return render(request, 'register.html', context)                                                 
-                                                      
+
+
 class PasswordResetView(View):
     
     def get(self, request):
@@ -99,7 +105,8 @@ class PasswordResetView(View):
                            'matcherror': False,
                            'form': ResetForm()}
             return render(request, 'pwdreset.html', context)
-    
+
+
 class ProfileView(View):
     
     def get(self, request):
@@ -122,7 +129,8 @@ class ProfileView(View):
                    'sheet_list': Sheet.objects.filter(owner=request.user),
                    'form': form}
         return render(request, 'profile.html', context)
-    
+
+
 def home_view(request):
     skills = list([s for s in Skill.objects.all() if s.super_skill == None])
     print(type(skills))

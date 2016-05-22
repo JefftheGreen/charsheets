@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 import warnings
 from . import Skill
 
+
 class Effect(models.Model):
     
     # Value keys for the saves
@@ -76,7 +77,6 @@ class Effect(models.Model):
                           (UNT, 'Untyped/Other')
                          )
                           
-                          
     # The owner of the effect. If this is not null, it is available to be
     # copied to multiple sheets but isn't used in a specific sheet.
     # This and sheet should not both have non-null values. Both may be null.
@@ -126,8 +126,7 @@ class Effect(models.Model):
     # in SAVE_CHOICES
     save_bonus = models.IntegerField(choices=SAVE_CHOICES, default=None, 
                                      null=True)
-    
-    
+
     def total_ability_bonus(self, ability):
         bonus = []
         if self.ability_bonus == ability:
@@ -147,8 +146,7 @@ class Effect(models.Model):
         for sub_effect in self.sub_effect.all():
             bonus += sub_effect.total_ability_bonus(ability)
         return bonus
-    
-    
+
     def total_skill_bonus(self, skill):
         if type(skill) == int:
             skill = Skill.objects.get(id=skill)
@@ -202,7 +200,6 @@ class Effect(models.Model):
                         bonuses[skill] = {bonus_type: sub_effect_bonuses
                                                       [skill][bonus_type]}
         return bonuses
-            
-    
+
     def __str__(self):
         return self.name

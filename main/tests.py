@@ -48,4 +48,3 @@ class Effect_Test(TestCase):
         skill = Skill.objects.get(id=11)
         print(sheet.effect_set.all(), sheet.effect_set.filter(active=True))
         print('str', sheet.fin_str)
-        #print(sheet.effect_skill_bonus(skill, effect))

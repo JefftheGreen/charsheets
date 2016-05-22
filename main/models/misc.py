@@ -1,7 +1,4 @@
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from main.default_data import DEFAULT_SKILL_IDS
     
     
 class Container(models.Model):
@@ -40,7 +37,8 @@ class Item(models.Model):
     weapon_enhancement_bonus = models.CharField(max_length=50)
     armor_enhancement_bonus = models.CharField(max_length=50)
     container = models.ForeignKey(Container, on_delete=models.CASCADE)
-    
+
+
 class Property(models.Model):
     
     item = models.ForeignKey(Item, on_delete=models.CASCADE)
@@ -76,8 +74,7 @@ class Skill(models.Model):
     rename = models.BooleanField(default=True)
     stat_override = models.IntegerField(default=None, null=True, 
                                         choices=ABILITY_CHOICES)
-    
-    
+
     def __str__(self):
         return self.name
 
@@ -92,7 +89,8 @@ class Feat(models.Model):
     
     def __str__(self):
         return self.name
-        
+
+
 # Class representing racial abilities. Mostly a wrapper for Effect, but stores 
 # its own description and name. 
 class RacialAbility(models.Model):
@@ -103,7 +101,8 @@ class RacialAbility(models.Model):
     
     def __str__(self):
         return self.name
-        
+
+
 # Class representing class abilities. Mostly a wrapper for Effect, but stores 
 # its own description and name. 
 class ClassAbility(models.Model):
@@ -114,4 +113,3 @@ class ClassAbility(models.Model):
     
     def __str__(self):
         return self.name
-        
