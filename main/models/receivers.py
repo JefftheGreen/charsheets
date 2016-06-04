@@ -1,3 +1,7 @@
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from . import Sheet
+
 @receiver(post_save)
 def finished_saving(sender, **kwargs):
     if sender == Sheet:
