@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 import warnings
 from . import Skill
 
@@ -76,17 +78,15 @@ class Effect(models.Model):
                           (SHD, 'Shield'),
                           (UNT, 'Untyped/Other')
                          )
-                          
-    # The owner of the effect. If this is not null, it is available to be
-    # copied to multiple sheets but isn't used in a specific sheet.
-    # This and sheet should not both have non-null values. Both may be null.
-    # For example, when attached to an item or feat, both should be null.
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, null=True,
-                              default=None)
-    # The sheet the effect is attached to. If this is null, it isn't attached
-    # directly to a character sheet but may affect a character through a feat
-    # or item.
-    sheet = models.ForeignKey('Sheet', null=True, default=None)
+
+    # The type of the owner of this effect. Always User, Sheet, or null.
+    # Which one determines some behavior and whether it's displayed on a sheet.
+    owner_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,
+                                   null=True)
+    # The id of the owner. Refers to a user or sheet if not none.
+    owner_id = models.PositiveIntegerField(null=True)
+    # The owner of the effect. Can be a User, a Sheet
+    owner = GenericForeignKey('owner_type', 'owner_id')
     # Whether the effect is active. If not, it's not factored into the
     # character sheet.
     active = models.BooleanField(default=True)
