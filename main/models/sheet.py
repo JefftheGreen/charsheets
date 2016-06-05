@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import re
 
 
 class Sheet(models.Model):
@@ -305,6 +306,34 @@ class Sheet(models.Model):
         item_effects = []
         return raw_effects + feat_effects + item_effects
 
+    @property
+    def base_fort(self):
+        num_regex = re.compile('[0-9]+')
+        found = num_regex.search(self.disp_base_fort)
+        if found:
+            return found.group()
+        else:
+            return 0
+
+    @property
+    def base_ref(self):
+        num_regex = re.compile('[0-9]+')
+        found = num_regex.search(self.disp_base_ref)
+        if found:
+            return found.group()
+        else:
+            return 0
+
+    @property
+    def base_will(self):
+        num_regex = re.compile('[0-9]+')
+        found = num_regex.search(self.disp_base_will)
+        if found:
+            return found.group()
+        else:
+            return 0
+
+
     # Gets the bonuses and penalties for an ability from a single effect
     #   ability:
     #       the ability to get bonuses for. integer (see Effect model).
@@ -389,6 +418,52 @@ class Sheet(models.Model):
                     bonuses[bonus_type] = range(0, 1)
         return bonuses
 
+    # Gets the bonuses and penalties for an ability from a single effect
+    #   save:
+    #       the save to get bonuses for. integer (see Effect model).
+    #   effect:
+    #       the effect to get bonuses from. Effect.
+    # Returns a dictionary. Format is {bonus_type: modifiers}. bonus_type
+    # is an integer referring to the bonus type (see models.Effect). modifiers
+    # is a range with minimum equal to the penalty of that type (0 if none)
+    # and a maximum equal to the bonus of that type (0 if none).
+    def effect_save_bonus(self, save, effect):
+        raw_bonuses = effect.total_save_bonus(save)
+        # Bonuses are stored as bonus_type: bonus. bonus_type is an integer
+        # referring to the bonus types in Effect. bonus is a range with min
+        # equal to the worst penalty and a max equal to the best bonus.
+        # Remember when setting ranges that the max is set to the second
+        # argument _minus one_, so you need to make it one higher.
+        bonuses = {}
+        for bonus_type, amount in raw_bonuses:
+            if type(amount) is str:
+                amount = {'Strength': self.fin_str_mod,
+                          'Dexterity': self.fin_dex_mod,
+                          'Constitution': self.fin_con_mod,
+                          'Intelligence': self.fin_int_mod,
+                          'Wisdom': self.fin_wis_mod,
+                          'Charisma': self.fin_cha_mod,
+                          }[amount]
+            if bonus_type in bonuses:
+                old_bonus = bonuses[bonus_type]
+                # If amount is a penalty and worse than the old one, use it
+                if amount < min(old_bonus):
+                    bonuses[bonus_type] = range(amount, max(old_bonus) + 1)
+                # If amount is a bonus and better than the old one, use it
+                elif amount > max(old_bonus):
+                    bonuses[bonus_type] = range(min(old_bonus), amount + 1)
+            else:
+                # If amount is a bonus, set penalty to 0 and bonus to amount
+                if amount > 0:
+                    bonuses[bonus_type] = range(0, amount + 1)
+                # If amount is a penalty, set penalty to amount and bonus to 0
+                elif amount < 0:
+                    bonuses[bonus_type] = range(amount, 1)
+                # This shouldn't happen
+                else:
+                    bonuses[bonus_type] = range(0, 1)
+        return bonuses
+
     # Gets the ability bonuses of each type from all effects
     #   ability:
     #       the ability to get bonuses for. integer (see Effect model).
@@ -400,6 +475,30 @@ class Sheet(models.Model):
         bonuses = {}
         for effect in self.active_effects:
             effect_bonuses = self.effect_ability_bonus(ability, effect)
+            for bonus_type in effect_bonuses:
+                penalty = min(effect_bonuses[bonus_type])
+                bonus = max(effect_bonuses[bonus_type])
+                if bonus_type in bonuses:
+                    old_penalty = min(bonuses[bonus_type])
+                    old_bonus = max(bonuses[bonus_type])
+                    worst_penalty = min(old_penalty, penalty)
+                    best_bonus = max(old_bonus, bonus)
+                    bonuses[bonus_type] = range(worst_penalty, best_bonus)
+                else:
+                    bonuses[bonus_type] = range(penalty, bonus + 1)
+        return bonuses
+
+    # Gets the ability bonuses of each type from all effects
+    # save:
+    #       the save to get bonuses for. integer (see Effect model)
+    # Returns a dictionary. Format is {bonus_type: modifiers}. bonus_type
+    # is an integer referring to the bonus type (see models.Effect). modifiers
+    # is a range with minimum equal to the penalty of that type (0 if none)
+    # and a maximum equal to the bonus of that type (0 if none).
+    def total_skill_bonus(self, skill):
+        bonuses = {}
+        for effect in self.active_effects:
+            effect_bonuses = self.effect_ability_bonus(skill, effect)
             for bonus_type in effect_bonuses:
                 penalty = min(effect_bonuses[bonus_type])
                 bonus = max(effect_bonuses[bonus_type])

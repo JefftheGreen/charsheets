@@ -139,8 +139,8 @@ class Effect(models.Model):
                 raise RuntimeError(e)
             # This shouldn't happen
             else:
-                w = "Effect {0} has a skill listed but no bonus amount".format(
-                        self.id)
+                w = ("Effect {0} has an ability listed but no bonus amount"
+                     .format(self.id))
                 warnings.warn(w, RuntimeWarning)
         # Add sub-effect bonuses
         for sub_effect in self.sub_effect.all():
@@ -167,6 +167,28 @@ class Effect(models.Model):
         # Add sub-effect bonuses
         for sub_effect in self.sub_effect.all():
             bonus += sub_effect.total_skill_bonus(skill)
+        return bonus
+
+    def total_save_bonus(self, save):
+        if type(save) == int:
+            save = Skill.objects.get(id=save)
+        bonus = []
+        # Only add if this effect has a bonus to the specified skill
+        if self.save_bonus == save:
+            # A fixed bonus
+            if self.bonus_amount is not None:
+                bonus.append((self.bonus_type, self.bonus_amount))
+            # A bonus equal to an ability score modifier
+            elif self.x_to_y_bonus_ability is not None:
+                bonus.append((self.bonus_type, self.get_from_x_stat_display()))
+            # This shouldn't happen
+            else:
+                w = "Effect {0} has a save listed but no bonus amount".format(
+                    self.id)
+                warnings.warn(w, RuntimeWarning)
+        # Add sub-effect bonuses
+        for sub_effect in self.sub_effect.all():
+            bonus += sub_effect.total_save_bonus(save)
         return bonus
     
     @property
