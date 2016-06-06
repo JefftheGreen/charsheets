@@ -45,6 +45,60 @@ class Sheet(models.Model):
     disp_base_ref = models.CharField(max_length=5)
     # The character's Fort, displayed on the sheet, and parsed for calculations
     disp_base_fort = models.CharField(max_length=5)
+    # Whether the character is blinded
+    blinded = models.BooleanField(default=False)
+    # Whether the character is confused
+    confused = models.BooleanField(default=False)
+    # Whether the character is dazed
+    dazed = models.BooleanField(default=False)
+    # Whether the character is dazzled
+    dazzled = models.BooleanField(default=False)
+    # Whether the character is deafened
+    deafened = models.BooleanField(default=False)
+    # Whether the character is disabled
+    disabled = models.BooleanField(default=False)
+    # Whether the character is dying
+    dying = models.BooleanField(default=False)
+    # Whether the character is entangled
+    entangled = models.BooleanField(default=False)
+    # Whether the character is fascinated
+    fascinated = models.BooleanField(default=False)
+    # Whether the character is flat-footed
+    flat_footed = models.BooleanField(default=False)
+    # Whether the character is grappling
+    grappling = models.BooleanField(default=False)
+    # Whether the character is helpless
+    helpless = models.BooleanField(default=False)
+    # Whether the character is incorporeal
+    incorporeal = models.BooleanField(default=False)
+    # Whether the character is invisible
+    invisible = models.BooleanField(default=False)
+    # Whether the character is nauseated
+    nauseated = models.BooleanField(default=False)
+    # Whether the character is paralyzed
+    paralyzed = models.BooleanField(default=False)
+    # Whether the character is petrified
+    petrified = models.BooleanField(default=False)
+    # Whether the character is pinned
+    pinned = models.BooleanField(default=False)
+    # Whether the character is prone
+    prone = models.BooleanField(default=False)
+    # Whether the character is sickened
+    sickened = models.BooleanField(default=False)
+    # Whether the character is stable
+    stable = models.BooleanField(default=False)
+    # Whether the character is staggered
+    staggered = models.BooleanField(default=False)
+    # Whether the character is stunned
+    stunned = models.BooleanField(default=False)
+    # Whether the character is turned
+    turned = models.BooleanField(default=False)
+    # Whether the character is unconscious
+    unconscious = models.BooleanField(default=False)
+    # Whether the character is fatigued 0=normal, 1=fatigued, 2=exhausted
+    fatigue_degree = models.IntegerField(null=False, default=0)
+    # How much fear 0=normal, 1=shaken, 2=frightened, 3=panicked, 4=cowering
+    fear_degree = models.IntegerField(null=False, default=0)
         
     # The character's base Str, used in calculations. integer
     @property
@@ -178,9 +232,13 @@ class Sheet(models.Model):
         fin_str = self.base_str
         if fin_str is None:
             return None
+        # Apply bonuses and penalties for each effect
         for bonus_type, modifiers in self.total_ability_bonus(0).items():
             penalty, bonus = min(modifiers), max(modifiers)
             fin_str += penalty + bonus
+        # Apply fatigue/exhaustion penalties
+        fin_str += [0, -2, -6][self.fatigue_degree]
+        fin_str = 0 if self.paralyzed else fin_str
         return fin_str
     
     # The character's Dex, accounting for all effects. integer
@@ -192,6 +250,9 @@ class Sheet(models.Model):
         for bonus_type, modifiers in self.total_ability_bonus(1).items():
             penalty, bonus = min(modifiers), max(modifiers)
             fin_dex += penalty + bonus
+        # Apply fatigue/exhaustion penalties
+        fin_dex += [0, -2, -6][self.fatigue_degree]
+        fin_dex = 0 if self.paralyzed or self.helpless else fin_dex
         return fin_dex
     
     # The character's Con, accounting for all effects. integer
@@ -332,7 +393,6 @@ class Sheet(models.Model):
             return found.group()
         else:
             return 0
-
 
     # Gets the bonuses and penalties for an ability from a single effect
     #   ability:
@@ -498,7 +558,7 @@ class Sheet(models.Model):
     def total_skill_bonus(self, skill):
         bonuses = {}
         for effect in self.active_effects:
-            effect_bonuses = self.effect_ability_bonus(skill, effect)
+            effect_bonuses = self.effect_skill_bonus(skill, effect)
             for bonus_type in effect_bonuses:
                 penalty = min(effect_bonuses[bonus_type])
                 bonus = max(effect_bonuses[bonus_type])
@@ -513,16 +573,16 @@ class Sheet(models.Model):
         return bonuses
 
     # Gets the ability bonuses of each type from all effects
-    # skill:
-    #       the skill to get bonuses for. Skill or integer refering to Skill id.
+    # save:
+    #       the save to get bonuses for. Skill or integer refering to Skill id.
     # Returns a dictionary. Format is {bonus_type: modifiers}. bonus_type
     # is an integer referring to the bonus type (see models.Effect). modifiers
     # is a range with minimum equal to the penalty of that type (0 if none)
     # and a maximum equal to the bonus of that type (0 if none).
-    def total_skill_bonus(self, skill):
+    def total_save_bonus(self, save):
         bonuses = {}
         for effect in self.active_effects:
-            effect_bonuses = self.effect_ability_bonus(skill, effect)
+            effect_bonuses = self.effect_save_bonus(save, effect)
             for bonus_type in effect_bonuses:
                 penalty = min(effect_bonuses[bonus_type])
                 bonus = max(effect_bonuses[bonus_type])
