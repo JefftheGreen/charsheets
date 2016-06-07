@@ -4,9 +4,15 @@ import re
 
 
 class Sheet(models.Model):
+
+    SAVE_ABILITIES = {0: 2,
+                      1: 1,
+                      2: 4}
     
     # The user that created the sheet
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    # The time the effect was created
+    date = models.DateTimeField(default=datetime.now)
     # The name of the sheet, displayed where the sheet is referred to
     name = models.CharField(max_length=200)
     # The character name, displayed on the sheet
@@ -99,143 +105,80 @@ class Sheet(models.Model):
     fatigue_degree = models.IntegerField(null=False, default=0)
     # How much fear 0=normal, 1=shaken, 2=frightened, 3=panicked, 4=cowering
     fear_degree = models.IntegerField(null=False, default=0)
+
+    @property
+    def disp_abilities(self):
+        return (self.disp_base_str, self.disp_base_dex, self.disp_base_con,
+                self.disp_base_int, self.disp_base_wis, self.disp_base_cha)
+
+    @property
+    def disp_saves(self):
+        return (self.disp_base_fort, self.disp_base_ref, self.disp_base_will)
         
     # The character's base Str, used in calculations. integer
     @property
     def base_str(self):
-        try:
-            return max(0, int(self.disp_base_str))
-        except ValueError:
-            try:
-                return float(self.disp_base_str)
-            except ValueError:
-                return None
+        return self.base_ability(0)
     
     # The character's base Dex, used in calculations. integer
     @property
     def base_dex(self):
-        try:
-            return int(self.disp_base_dex)
-        except ValueError:
-            try:
-                return float(self.disp_base_dex)
-            except ValueError:
-                return None
+        return self.base_ability(1)
     
     # The character's base Con, used in calculations. integer
     @property
     def base_con(self):
-        try:
-            return int(self.disp_base_con)
-        except ValueError:
-            try:
-                return float(self.disp_base_con)
-            except ValueError:
-                return None
+        return self.base_ability(2)
     
     # The character's base Int, used in calculations. integer
     @property
     def base_int(self):
-        try:
-            return int(self.disp_base_int)
-        except ValueError:
-            try:
-                return float(self.disp_base_int)
-            except ValueError:
-                return None
+        return self.base_ability(3)
     
     # The character's base Wis, used in calculations. integer
     @property
     def base_wis(self):
-        try:
-            return int(self.disp_base_wis)
-        except ValueError:
-            try:
-                return float(self.disp_base_wis)
-            except ValueError:
-                return None
+        return self.base_ability(4)
     
     # The character's base Cha, used in calculations. integer
     @property
     def base_cha(self):
-        try:
-            return int(self.disp_base_cha)
-        except ValueError:
-            try:
-                return float(self.disp_base_cha)
-            except ValueError:
-                return None
+        return self.base_ability(5)
     
     # The character's base Str modifier, calculated from base_str. integer
     @property
     def base_str_mod(self):
-        if self.base_str is None:
-            return 0
-        else:
-            return int((self.base_str - 10) / 2)
+        return self.ability_mod(self.base_str)
     
     # The character's base Dex modifier, calculated from base_dex. integer
     @property
     def base_dex_mod(self):
-        if self.base_dex is None:
-            return 0
-        else:
-            return int((self.base_dex - 10) / 2)
+        return self.ability_mod(self.base_dex)
      
     # The character's base Con modifier, calculated from base_con. integer
     @property
     def base_con_mod(self):
-        if self.base_con is None:
-            return 0
-        else:
-            return int((self.base_con - 10) / 2)
+        return self.ability_mod(self.base_con)
     
     # The character's base Int modifier, calculated from base_int. integer
     @property
     def base_int_mod(self):
-        if self.base_int is None:
-            return 0
-        else:
-            return int((self.base_int - 10) / 2)
+        return self.ability_mod(self.base_int)
     
     # The character's base Wis modifier, calculated from base_wis. integer
     @property
     def base_wis_mod(self):
-        if self.base_wis is None:
-            return 0
-        else:
-            return int((self.base_wis - 10) / 2)
+        return self.ability_mod(self.base_wis)
     
     # The character's base Cha modifier, calculated from base_cha. integer
     @property
     def base_cha_mod(self):
-        if self.base_cha is None:
-            return 0
-        else:
-            return int((self.base_cha - 10) / 2)
-            
-    # All base abilities for easy reference. 6-tuple of integers
-    @property
-    def base_abilities(self):
-        return (self.base_str, self.base_dex, self.base_con,
-                self.base_int, self.base_wis, self.base_cha)
-    
-    # All base ability modifiers for easy reference. 6-tuple of integers
-    @property
-    def base_ability_mods(self):
-        return (self.base_str_mod, self.base_dex_mod, self.base_con_mod,
-                self.base_int_mod, self.base_wis_mod, self.base_cha_mod)
+        return self.ability_mod(self.base_cha)
     
     # The character's Str, accounting for all effects. integer
     @property
     def fin_str(self):
-        fin_str = self.base_str
-        if fin_str is None:
-            return None
-        # Apply bonuses and penalties for each effect
-        for bonus_type, modifiers in self.total_ability_bonus(0).items():
-            penalty, bonus = min(modifiers), max(modifiers)
-            fin_str += penalty + bonus
+        fin_str = self.fin_ability(0)
         # Apply fatigue/exhaustion penalties
         fin_str += [0, -2, -6][self.fatigue_degree]
         fin_str = 0 if self.paralyzed else fin_str
@@ -244,12 +187,7 @@ class Sheet(models.Model):
     # The character's Dex, accounting for all effects. integer
     @property
     def fin_dex(self):
-        fin_dex = self.base_dex
-        if fin_dex is None:
-            return None
-        for bonus_type, modifiers in self.total_ability_bonus(1).items():
-            penalty, bonus = min(modifiers), max(modifiers)
-            fin_dex += penalty + bonus
+        fin_dex = self.fin_ability(1)
         # Apply fatigue/exhaustion penalties
         fin_dex += [0, -2, -6][self.fatigue_degree]
         fin_dex = 0 if self.paralyzed or self.helpless else fin_dex
@@ -258,106 +196,52 @@ class Sheet(models.Model):
     # The character's Con, accounting for all effects. integer
     @property
     def fin_con(self):
-        fin_con = self.base_con
-        if fin_con is None:
-            return None
-        for bonus_type, modifiers in self.total_ability_bonus(2).items():
-            penalty, bonus = min(modifiers), max(modifiers)
-            fin_con += penalty + bonus
-        return fin_con
+        return self.fin_ability(2)
     
     # The character's Int, accounting for all effects. integer
     @property
     def fin_int(self):
-        fin_int = self.base_int
-        if fin_int is None:
-            return None
-        for bonus_type, modifiers in self.total_ability_bonus(3).items():
-            penalty, bonus = min(modifiers), max(modifiers)
-            fin_int += penalty + bonus
-        return fin_int
+        return self.fin_ability(3)
     
     # The character's Wis, accounting for all effects. integer
     @property
     def fin_wis(self):
-        fin_wis = self.base_wis
-        if fin_wis is None:
-            return None
-        for bonus_type, modifiers in self.total_ability_bonus(4).items():
-            penalty, bonus = min(modifiers), max(modifiers)
-            fin_wis += penalty + bonus
-        return fin_wis
+        return self.fin_ability(4)
     
     # The character's Cha, accounting for all effects. integer
     @property
     def fin_cha(self):
-        fin_cha = self.base_cha
-        if fin_cha is None:
-            return None
-        for bonus_type, modifiers in self.total_ability_bonus(5).items():
-            penalty, bonus = min(modifiers), max(modifiers)
-            fin_cha += penalty + bonus
-        return fin_cha
+        return self.fin_ability(5)
     
     # The character's Str modifier, calculated from fin_str. integer
     @property
     def fin_str_mod(self):
-        if self.fin_str is None:
-            return 0
-        else:
-            return int((self.fin_str - 10) / 2)
+        return self.ability_mod(self.fin_str)
     
     # The character's Dex modifier, calculated from fin_dex. integer
     @property
     def fin_dex_mod(self):
-        if self.fin_dex is None:
-            return 0
-        else:
-            return int((self.fin_dex - 10) / 2)
+        return self.ability_mod(self.fin_dex)
     
     # The character's Con modifier, calculated from fin_con. integer
     @property
     def fin_con_mod(self):
-        if self.fin_con is None:
-            return 0
-        else:
-            return int((self.fin_con - 10) / 2)
+        return self.ability_mod(self.fin_con)
     
     # The character's Int modifier, calculated from fin_int. integer
     @property
     def fin_int_mod(self):
-        if self.fin_int is None:
-            return 0
-        else:
-            return int((self.fin_int - 10) / 2)
+        return self.ability_mod(self.fin_int)
     
     # The character's Wis modifier, calculated from fin_wis. integer
     @property
     def fin_wis_mod(self):
-        if self.fin_wis is None:
-            return 0
-        else:
-            return int((self.fin_wis - 10) / 2)
+        return self.ability_mod(self.fin_wis)
     
     # The character's Cha modifier, calculated from fin_cha. integer
     @property
     def fin_cha_mod(self):
-        if self.fin_cha is None:
-            return 0
-        else:
-            return int((self.fin_cha - 10) / 2)
-    
-    # All base abilities for easy reference. 6-tuple of integers
-    @property
-    def fin_abilities(self):
-        return (self.fin_str, self.fin_dex, self.fin_con,
-                self.fin_int, self.fin_wis, self.fin_cha)
-    
-    # All base ability modifiers for easy reference. 6-tuple of integers
-    @property
-    def fin_ability_mods(self):
-        return (self.fin_str_mod, self.fin_dex_mod, self.fin_con_mod,
-                self.fin_int_mod, self.fin_wis_mod, self.fin_cha_mod)
+        return self.ability_mod(self.fin_cha)
     
     @property
     def active_effects(self):
@@ -393,6 +277,74 @@ class Sheet(models.Model):
             return found.group()
         else:
             return 0
+
+    @property
+    def fin_fort(self):
+        return self.fin_save(0)
+
+    @property
+    def fin_ref(self):
+        return self.fin_save(1)
+
+    @property
+    def fin_will(self):
+        return self.fin_save(2)
+
+    def base_ability(self, ability):
+        disp_ability = self.disp_abilities[ability]
+        try:
+            return int(disp_ability)
+        except ValueError:
+            try:
+                return float(disp_ability)
+            except ValueError:
+                num_regex = re.compile('[0-9]+')
+                found = num_regex.search(disp_ability)
+                if found:
+                    return int(found.group())
+                else:
+                    return None
+
+    def fin_ability(self, ability):
+        fin_ability = self.base_ability(ability)
+        if fin_ability is None:
+            return None
+        for bonus_type, modifiers in self.total_ability_bonus(ability).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            fin_ability += penalty + bonus
+        return fin_ability
+
+
+    def ability_mod(self, ability_score):
+        try:
+            return int((ability_score - 10) / 2)
+        except (ValueError, TypeError):
+            return None
+
+    def base_save(self, save):
+        disp_save = self.disp_saves[save]
+        try:
+            return int(disp_save)
+        except ValueError:
+            try:
+                return float(disp_save)
+            except ValueError:
+                num_regex = re.compile('[0-9]+')
+                found = num_regex.search(disp_save)
+                if found:
+                    return int(found.group())
+                else:
+                    return None
+
+    def fin_save(self, save):
+        fin_save = self.base_save(save)
+        fin_save += self.fin_ability(self.ultimate_save_ability(save))
+        for bonus_type, modifiers in self.total_save_bonus(save).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            fin_save += penalty + bonus
+        return fin_save
+
+
 
     # Gets the bonuses and penalties for an ability from a single effect
     #   ability:
@@ -595,3 +547,12 @@ class Sheet(models.Model):
                 else:
                     bonuses[bonus_type] = range(penalty, bonus + 1)
         return bonuses
+
+    def ultimate_save_ability(self, save):
+        abilities = [effect.ultimate_save_override(save)
+                     for effect in self.active_effects]
+        if abilities:
+            abilities.sort(key=lambda t: t[1])
+            return abilities[-1][0]
+        else:
+            return self.SAVE_ABILITIES[save]

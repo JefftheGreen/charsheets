@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from datetime import datetime
 import warnings
 from . import Skill
 
@@ -87,6 +88,8 @@ class Effect(models.Model):
     owner_id = models.PositiveIntegerField(null=True)
     # The owner of the effect. Can be a User, a Sheet
     owner = GenericForeignKey('owner_type', 'owner_id')
+    # The time the effect was created
+    date = models.DateTimeField(default=datetime.now)
     # Whether the effect is active. If not, it's not factored into the
     # character sheet.
     active = models.BooleanField(default=True)
@@ -126,6 +129,14 @@ class Effect(models.Model):
     # in SAVE_CHOICES
     save_bonus = models.IntegerField(choices=SAVE_CHOICES, default=None, 
                                      null=True)
+    # If the effect overrides a default ability to some statistic, this stores
+    # the ability using the values in ABILITY_CHOICES
+    override_ability = models.IntegerField(choices=ABILITY_CHOICES,
+                                           default=None, null=True)
+    # If the effect overrides a save's default ability, this stores the save
+    # using the values in SAVE_CHOICES
+    save_override = models.IntegerField(choices=SAVE_CHOICES, default=None,
+                                        null=True)
 
     def total_ability_bonus(self, ability):
         bonus = []
@@ -190,7 +201,31 @@ class Effect(models.Model):
         for sub_effect in self.sub_effect.all():
             bonus += sub_effect.total_save_bonus(save)
         return bonus
-    
+
+
+    # Gets the save whose ability the effect overrides.
+    #   save:
+    #       the save to get bonuses for. integer (see SAVE_CHOICES).
+    # Returns a 2-tuple (ability, date added), where ability is an integer
+    # from ABILITY_CHOICES and date is a the date the effect or sub-effect
+    # was created.
+    def ultimate_save_override(self, save):
+        overrides = []
+        # Getting tuples of (ability, date added)
+        if self.save_override == save:
+            overrides.append((save, self.date))
+        # Do the same for the sub-effects
+        for sub_effect in self.sub_effect.all():
+            sub_override = sub_effect.save_override
+            if sub_override[0] == save:
+                overrides.append(sub_override)
+        # Sort by date added
+        overrides.sort(key=lambda override: override[1])
+        # Return the most recent oone
+        return overrides[-1]
+
+
+
     @property
     def skill_bonuses(self):
         # Make skill bonus dictionary
