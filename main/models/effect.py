@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from datetime import datetime
+from django.utils import timezone
 from main.default_data import BONUS_TYPE_CHOICES, ABILITY_CHOICES, SAVE_CHOICES
 import warnings
 from . import Skill
@@ -19,7 +19,7 @@ class Effect(models.Model):
     # The owner of the effect. Can be a User, a Sheet
     owner = GenericForeignKey('owner_type', 'owner_id')
     # The time the effect was created
-    date = models.DateTimeField(default=datetime.now)
+    date = models.DateTimeField(default=timezone.now)
     # Whether the effect is active. If not, it's not factored into the
     # character sheet.
     active = models.BooleanField(default=True)
@@ -131,7 +131,6 @@ class Effect(models.Model):
         for sub_effect in self.sub_effect.all():
             bonus += sub_effect.total_save_bonus(save)
         return bonus
-
 
     # Gets the save whose ability the effect overrides.
     #   save:

@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 from main.default_data import DEFAULT_SAVE_ABILITIES
 import re
 
@@ -9,7 +10,7 @@ class Sheet(models.Model):
     # The user that created the sheet
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     # The time the effect was created
-    date = models.DateTimeField(default=datetime.now)
+    date = models.DateTimeField(default=timezone.now)
     # The name of the sheet, displayed where the sheet is referred to
     name = models.CharField(max_length=200)
     # The character name, displayed on the sheet
@@ -239,41 +240,18 @@ class Sheet(models.Model):
     @property
     def fin_cha_mod(self):
         return self.ability_mod(self.fin_cha)
-    
-    @property
-    def active_effects(self):
-        raw_effects = list(self.effect_set.filter(active=True))
-        feat_effects = []#[f.effect for f in self.feat_set.all()]
-        # TODO: Figure out how to implement item properties here.
-        item_effects = []
-        return raw_effects + feat_effects + item_effects
 
     @property
     def base_fort(self):
-        num_regex = re.compile('[0-9]+')
-        found = num_regex.search(self.disp_base_fort)
-        if found:
-            return found.group()
-        else:
-            return 0
+        return self.base_save(0)
 
     @property
     def base_ref(self):
-        num_regex = re.compile('[0-9]+')
-        found = num_regex.search(self.disp_base_ref)
-        if found:
-            return found.group()
-        else:
-            return 0
+        return self.base_save(1)
 
     @property
     def base_will(self):
-        num_regex = re.compile('[0-9]+')
-        found = num_regex.search(self.disp_base_will)
-        if found:
-            return found.group()
-        else:
-            return 0
+        return self.base_save(2)
 
     @property
     def fin_fort(self):
@@ -286,6 +264,14 @@ class Sheet(models.Model):
     @property
     def fin_will(self):
         return self.fin_save(2)
+
+    @property
+    def active_effects(self):
+        raw_effects = list(self.effect_set.filter(active=True))
+        feat_effects = []#[f.effect for f in self.feat_set.all()]
+        # TODO: Figure out how to implement item properties here.
+        item_effects = []
+        return raw_effects + feat_effects + item_effects
 
     def base_ability(self, ability):
         disp_ability = self.disp_abilities[ability]
