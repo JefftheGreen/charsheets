@@ -1,13 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
+from main.default_data import DEFAULT_SAVE_ABILITIES
 import re
 
 
 class Sheet(models.Model):
-
-    SAVE_ABILITIES = {0: 2,
-                      1: 1,
-                      2: 4}
     
     # The user that created the sheet
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -555,4 +552,4 @@ class Sheet(models.Model):
             abilities.sort(key=lambda t: t[1])
             return abilities[-1][0]
         else:
-            return self.SAVE_ABILITIES[save]
+            return DEFAULT_SAVE_ABILITIES[save]

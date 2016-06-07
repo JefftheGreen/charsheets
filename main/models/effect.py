@@ -3,82 +3,12 @@ from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from datetime import datetime
+from main.default_data import BONUS_TYPE_CHOICES, ABILITY_CHOICES, SAVE_CHOICES
 import warnings
 from . import Skill
 
 
 class Effect(models.Model):
-    
-    # Value keys for the saves
-    FORT = 0
-    REF = 1
-    WILL = 2
-    
-    # Value keys for the abilities
-    STR = 0
-    DEX = 1
-    CON = 2
-    INT = 3
-    WIS = 4
-    CHA = 5
-    
-    # Value keys for bonus types
-    ALC = 0
-    Arm = 1
-    CRC = 2
-    CMP = 3
-    DEF = 4
-    DIV = 5
-    DDG = 6
-    ENH = 7
-    EXL = 8
-    INS = 9
-    LCK = 10
-    MRL = 11
-    NAT = 12
-    PRF = 13
-    RAC = 14
-    RES = 15
-    SAC = 16
-    SHD = 17
-    UNT = 18
-    
-    SAVE_CHOICES = (
-                    (FORT, "Fortitude"),
-                    (REF, "Reflex"),
-                    (WILL, "Will")
-                    )
-                    
-    ABILITY_CHOICES = (
-                       (STR, 'Strength'),
-                       (DEX, 'Dexterity'),
-                       (CON, 'Constitution'),
-                       (INT, 'Intelligence'),
-                       (WIS, 'Wisdom'),
-                       (CHA, 'Charisma')
-                       )
-                       
-    BONUS_TYPE_CHOICES = (
-                          (ALC, 'Alchemical'),
-                          (Arm, 'Armor'),
-                          (CRC, 'Circumstance'),
-                          (CMP, 'Competence'),
-                          (DEF, 'Deflection'),
-                          (DIV, 'Divine'),
-                          (DDG, 'Dodge'),
-                          (ENH, 'Enhancement'),
-                          (EXL, 'Exalted'),
-                          (INS, 'Insight'), 
-                          (LCK, 'Luck'),
-                          (MRL, 'Morale'),
-                          (NAT, 'Natural'),
-                          (PRF, 'Profane'),
-                          (RAC, 'Racial'),
-                          (RES, 'Resistance'),
-                          (SAC, 'Sacred'), 
-                          (SHD, 'Shield'),
-                          (UNT, 'Untyped/Other')
-                         )
 
     # The type of the owner of this effect. Always User, Sheet, or null.
     # Which one determines some behavior and whether it's displayed on a sheet.
@@ -117,7 +47,7 @@ class Effect(models.Model):
                                                  choices=ABILITY_CHOICES,
                                                  null=True)
     # The bonus type, using the values in BONUS_TYPE_CHOICES
-    bonus_type = models.IntegerField()
+    bonus_type = models.IntegerField(default=18, choices=BONUS_TYPE_CHOICES)
     # If the bonus goes to a skill, this stores the skill
     skill_bonus = models.ForeignKey('Skill', on_delete=models.SET_NULL, 
                                     default=None, null=True)

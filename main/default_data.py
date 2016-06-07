@@ -6,6 +6,27 @@ INT = 3
 WIS = 4
 CHA = 5
 
+# Value keys for bonus types
+ALC = 0
+Arm = 1
+CRC = 2
+CMP = 3
+DEF = 4
+DIV = 5
+DDG = 6
+ENH = 7
+EXL = 8
+INS = 9
+LCK = 10
+MRL = 11
+NAT = 12
+PRF = 13
+RAC = 14
+RES = 15
+SAC = 16
+SHD = 17
+UNT = 18
+
 SKILL_DEFAULTS_3_5 = ("Appraise", "Autohypnosis", "Balance", "Bluff", "Climb", 
                       "Concentration", "Craft", "Decipher Script", "Diplomacy", 
                       "Disable Device", "Disguise", "Escape Artist", 
@@ -114,6 +135,59 @@ SKILL_ACP = {"Appraise": 0,
              
 DEFAULT_SKILL_IDS = range(1, 55)
 
+DEFAULT_SAVE_ABILITIES = {0: 2,
+                          1: 1,
+                          2: 4}
+
+BONUS_TYPE_CHOICES = (
+    (ALC, 'Alchemical'),
+    (Arm, 'Armor'),
+    (CRC, 'Circumstance'),
+    (CMP, 'Competence'),
+    (DEF, 'Deflection'),
+    (DIV, 'Divine'),
+    (DDG, 'Dodge'),
+    (ENH, 'Enhancement'),
+    (EXL, 'Exalted'),
+    (INS, 'Insight'),
+    (LCK, 'Luck'),
+    (MRL, 'Morale'),
+    (NAT, 'Natural'),
+    (PRF, 'Profane'),
+    (RAC, 'Racial'),
+    (RES, 'Resistance'),
+    (SAC, 'Sacred'),
+    (SHD, 'Shield'),
+    (UNT, 'Untyped/Other')
+)
+
+# Value keys for the saves
+FORT = 0
+REF = 1
+WILL = 2
+
+# Value keys for the abilities
+STR = 0
+DEX = 1
+CON = 2
+INT = 3
+WIS = 4
+CHA = 5
+
+SAVE_CHOICES = (
+    (FORT, "Fortitude"),
+    (REF, "Reflex"),
+    (WILL, "Will")
+)
+
+ABILITY_CHOICES = (
+    (STR, 'Strength'),
+    (DEX, 'Dexterity'),
+    (CON, 'Constitution'),
+    (INT, 'Intelligence'),
+    (WIS, 'Wisdom'),
+    (CHA, 'Charisma')
+)
 
 def main():
     from .models import Skill
