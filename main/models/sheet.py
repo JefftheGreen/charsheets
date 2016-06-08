@@ -2,11 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from main.default_data import DEFAULT_SAVE_ABILITIES
+from django.contrib.contenttypes.fields import GenericRelation
+from main.models.effect import Effect
 import re
 
 
 class Sheet(models.Model):
-    
+
     # The user that created the sheet
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     # The time the effect was created
@@ -321,7 +323,7 @@ class Sheet(models.Model):
 
     def fin_save(self, save):
         fin_save = self.base_save(save)
-        fin_save += self.fin_ability(self.ultimate_save_ability(save))
+        fin_save += self.ability_mod(self.fin_ability(self.ultimate_save_ability(save)))
         for bonus_type, modifiers in self.total_save_bonus(save).items():
             penalty, bonus = min(modifiers), max(modifiers)
             fin_save += penalty + bonus
@@ -534,8 +536,9 @@ class Sheet(models.Model):
     def ultimate_save_ability(self, save):
         abilities = [effect.ultimate_save_override(save)
                      for effect in self.active_effects]
-        if abilities:
+        abilities=list(filter((None,None).__ne__, abilities))
+        try:
             abilities.sort(key=lambda t: t[1])
             return abilities[-1][0]
-        else:
+        except (IndexError, TypeError):
             return DEFAULT_SAVE_ABILITIES[save]

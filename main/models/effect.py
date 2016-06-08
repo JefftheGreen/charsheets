@@ -5,19 +5,14 @@ from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from main.default_data import BONUS_TYPE_CHOICES, ABILITY_CHOICES, SAVE_CHOICES
 import warnings
-from . import Skill
+from main.models.misc import Skill
 
 
 class Effect(models.Model):
 
-    # The type of the owner of this effect. Always User, Sheet, or null.
-    # Which one determines some behavior and whether it's displayed on a sheet.
-    owner_type = models.ForeignKey(ContentType, on_delete=models.CASCADE,
-                                   null=True)
-    # The id of the owner. Refers to a user or sheet if not none.
-    owner_id = models.PositiveIntegerField(null=True)
-    # The owner of the effect. Can be a User, a Sheet
-    owner = GenericForeignKey('owner_type', 'owner_id')
+    owner = models.ForeignKey(User, null=True, default=None)
+
+    sheet = models.ForeignKey('sheet', null=True, default=None)
     # The time the effect was created
     date = models.DateTimeField(default=timezone.now)
     # Whether the effect is active. If not, it's not factored into the
@@ -47,7 +42,8 @@ class Effect(models.Model):
                                                  choices=ABILITY_CHOICES,
                                                  null=True)
     # The bonus type, using the values in BONUS_TYPE_CHOICES
-    bonus_type = models.IntegerField(default=18, choices=BONUS_TYPE_CHOICES)
+    bonus_type = models.IntegerField(default=18, choices=BONUS_TYPE_CHOICES,
+                                     null=True)
     # If the bonus goes to a skill, this stores the skill
     skill_bonus = models.ForeignKey('Skill', on_delete=models.SET_NULL, 
                                     default=None, null=True)
@@ -99,7 +95,7 @@ class Effect(models.Model):
                 bonus.append((self.bonus_type, self.bonus_amount))
             # A bonus equal to an ability score modifier
             elif self.x_to_y_bonus_ability is not None:
-                bonus.append((self.bonus_type, self.get_from_x_stat_display()))
+                bonus.append((self.bonus_type, self.get_x_to_y_bonus_ability_display()))
             # This shouldn't happen
             else:
                 w = "Effect {0} has a skill listed but no bonus amount".format(
@@ -111,8 +107,6 @@ class Effect(models.Model):
         return bonus
 
     def total_save_bonus(self, save):
-        if type(save) == int:
-            save = Skill.objects.get(id=save)
         bonus = []
         # Only add if this effect has a bonus to the specified skill
         if self.save_bonus == save:
@@ -121,7 +115,7 @@ class Effect(models.Model):
                 bonus.append((self.bonus_type, self.bonus_amount))
             # A bonus equal to an ability score modifier
             elif self.x_to_y_bonus_ability is not None:
-                bonus.append((self.bonus_type, self.get_from_x_stat_display()))
+                bonus.append((self.bonus_type, self.get_x_to_y_bonus_ability_display()))
             # This shouldn't happen
             else:
                 w = "Effect {0} has a save listed but no bonus amount".format(
@@ -146,12 +140,14 @@ class Effect(models.Model):
         # Do the same for the sub-effects
         for sub_effect in self.sub_effect.all():
             sub_override = sub_effect.save_override
-            if sub_override[0] == save:
-                overrides.append(sub_override)
+            if sub_override == save:
+                overrides.append((sub_override, sub_effect.date))
         # Sort by date added
-        overrides.sort(key=lambda override: override[1])
+        if overrides:
+            overrides.sort(key=lambda override: override[1])
         # Return the most recent oone
-        return overrides[-1]
+
+        return overrides[-1] if overrides else (None, None)
 
 
 
@@ -164,7 +160,7 @@ class Effect(models.Model):
             bonuses = {self.skill_bonus_id:
                             {self.bonus_type:[self.bonus_amount 
                                             if self.bonus_amount is not None
-                                            else self.get_from_x_stat_display()]
+                                            else self.get_x_to_y_bonus_ability_display()]
                                 
                             }
                        }
