@@ -1,7 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 from main.default_data import BONUS_TYPE_CHOICES, ABILITY_CHOICES, SAVE_CHOICES
 import warnings
@@ -10,8 +8,11 @@ from main.models.misc import Skill
 
 class Effect(models.Model):
 
+    # The owner of the effect. This is used if the effect is stored for use by
+    # multiple sheets owned by a user. Either this or sheet should be None.
     owner = models.ForeignKey(User, null=True, default=None)
-
+    # The sheet the effect is attached to. This is used if the effect is used by
+    # a sheet. Either this or owner should be None.
     sheet = models.ForeignKey('sheet', null=True, default=None)
     # The time the effect was created
     date = models.DateTimeField(default=timezone.now)

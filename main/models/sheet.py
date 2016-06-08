@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from main.default_data import DEFAULT_SAVE_ABILITIES
-from django.contrib.contenttypes.fields import GenericRelation
-from main.models.effect import Effect
 import re
 
 

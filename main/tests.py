@@ -69,14 +69,13 @@ class Effect_Test(TestCase):
         supes = Effect.objects.get(name='test_sub_effects')
         assert supes.skill_bonuses == {
             10: {0:[2]},
-            11: {1:[5], 2:['Intelligence']},
+            11: {1:[5]},
         }
 
     def test_effects(self):
         sheet = Sheet.objects.get(name='test_sheet')
         effect = Effect.objects.get(name='test_sub_effects')
         skill = Skill.objects.get(id=11)
-        print(sheet.fin_fort, sheet.fin_ref, sheet.fin_will)
         assert sheet.fin_fort == 10
         assert sheet.fin_ref == 9
         assert sheet.fin_will == 7
