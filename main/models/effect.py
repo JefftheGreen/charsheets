@@ -65,6 +65,12 @@ class Effect(models.Model):
     save_override = models.IntegerField(choices=SAVE_CHOICES, default=None,
                                         null=True)
 
+    # Gets the total bonus the effect gives to an ability.
+    #   ability:
+    #       the ability to get bonuses for. integer (see default_data).
+    # Returns a list of 2-tuples. The first element of the tuples is an integer
+    # indicating the bonus type (see default_data); the second is the bonus
+    # amount (an integer).
     def total_ability_bonus(self, ability):
         bonus = []
         if self.ability_bonus == ability:
@@ -85,6 +91,12 @@ class Effect(models.Model):
             bonus += sub_effect.total_ability_bonus(ability)
         return bonus
 
+    # Gets the total bonus the effect gives to a skill.
+    #   ability:
+    #       the skill to get bonuses for. integer (see default_data).
+    # Returns a list of 2-tuples. The first element of the tuples is an integer
+    # indicating the bonus type (see default_data); the second is the bonus
+    # amount (an integer).
     def total_skill_bonus(self, skill):
         if type(skill) == int:
             skill = Skill.objects.get(id=skill)
@@ -107,6 +119,12 @@ class Effect(models.Model):
             bonus += sub_effect.total_skill_bonus(skill)
         return bonus
 
+    # Gets the total bonus the effect gives to a save.
+    #   ability:
+    #       the save to get bonuses for. integer (see default_data).
+    # Returns a list of 2-tuples. The first element of the tuples is an integer
+    # indicating the bonus type (see default_data); the second is the bonus
+    # amount (an integer).
     def total_save_bonus(self, save):
         bonus = []
         # Only add if this effect has a bonus to the specified skill
@@ -149,8 +167,6 @@ class Effect(models.Model):
         # Return the most recent oone
 
         return overrides[-1] if overrides else (None, None)
-
-
 
     @property
     def skill_bonuses(self):

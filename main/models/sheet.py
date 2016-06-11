@@ -113,32 +113,32 @@ class Sheet(models.Model):
     def disp_saves(self):
         return (self.disp_base_fort, self.disp_base_ref, self.disp_base_will)
         
-    # The character's base Str, used in calculations. integer
+    # The character's base Str, used in calculations. numeric
     @property
     def base_str(self):
         return self.base_ability(0)
     
-    # The character's base Dex, used in calculations. integer
+    # The character's base Dex, used in calculations. numeric
     @property
     def base_dex(self):
         return self.base_ability(1)
     
-    # The character's base Con, used in calculations. integer
+    # The character's base Con, used in calculations. numeric
     @property
     def base_con(self):
         return self.base_ability(2)
     
-    # The character's base Int, used in calculations. integer
+    # The character's base Int, used in calculations. numeric
     @property
     def base_int(self):
         return self.base_ability(3)
     
-    # The character's base Wis, used in calculations. integer
+    # The character's base Wis, used in calculations. numeric
     @property
     def base_wis(self):
         return self.base_ability(4)
     
-    # The character's base Cha, used in calculations. integer
+    # The character's base Cha, used in calculations. numeric
     @property
     def base_cha(self):
         return self.base_ability(5)
@@ -241,30 +241,37 @@ class Sheet(models.Model):
     def fin_cha_mod(self):
         return self.ability_mod(self.fin_cha)
 
+    # The character's base Fortitude save, used in calculations. numeric
     @property
     def base_fort(self):
         return self.base_save(0)
 
+    # The character's base Fortitude save, used in calculations. numeric
     @property
     def base_ref(self):
         return self.base_save(1)
 
+    # The character's base Fortitude save, used in calculations. numeric
     @property
     def base_will(self):
         return self.base_save(2)
 
+    # The character's base Fortitude save, used in calculations. numeric
     @property
     def fin_fort(self):
         return self.fin_save(0)
 
+    # The character's base Fortitude save, used in calculations. numeric
     @property
     def fin_ref(self):
         return self.fin_save(1)
 
+    # The character's base Fortitude save, used in calculations. numeric
     @property
     def fin_will(self):
         return self.fin_save(2)
 
+    # The character's base Fortitude save, used in calculations. numeric
     @property
     def active_effects(self):
         raw_effects = list(self.effect_set.filter(active=True))
@@ -273,55 +280,97 @@ class Sheet(models.Model):
         item_effects = []
         return raw_effects + feat_effects + item_effects
 
+    # Parses an ability's display value into a numeric.
+    #   ability:
+    #       the ability to get bonuses for. integer (see Effect model).
+    # Returns a numeric or None. In order of preference, disp_base_X as an
+    # integer, disp_base_X as a float, disp_base_X with the first regex
+    # indicating a float ('[0-9]+(\.[0-9]+)*'), and None.
     def base_ability(self, ability):
         disp_ability = self.disp_abilities[ability]
+        # If we can, just turn it into a numeric
         try:
             return int(disp_ability)
         except ValueError:
             try:
                 return float(disp_ability)
+            # It doesn't turn into a numeric
             except ValueError:
-                num_regex = re.compile('[0-9]+')
+                # Find the first float-like string in disp_ability
+                num_regex = re.compile('[0-9]+(\.[0-9]+)*')
                 found = num_regex.search(disp_ability)
+                # If it exists
                 if found:
-                    return int(found.group())
+                    return float(found.group())
+                # If there's something other than a number in disp_ability,
+                # treat it as a non-ability.
                 else:
                     return None
 
+    # Calculates a final ability score, including all bonuses.
+    #   ability:
+    #       the ability to get the modifier for. integer (see Effect model).
+    # Returns an integer or None.
     def fin_ability(self, ability):
+        # Start with the base ability
         fin_ability = self.base_ability(ability)
+        # If we couldn't parse disp_ability, it's a non-ability
         if fin_ability is None:
             return None
+        # Add all penalties and bonuses from effects
         for bonus_type, modifiers in self.total_ability_bonus(ability).items():
             penalty, bonus = min(modifiers), max(modifiers)
             fin_ability += penalty + bonus
         return fin_ability
 
-
+    # Gets the ability modifier for an ability. (ability - 10) / 2
+    #   ability:
+    #       the ability to get the modifier for. integer (see Effect model).
+    # Returns an integer or None.
     def ability_mod(self, ability_score):
         try:
             return int((ability_score - 10) / 2)
+        # It's not a numeric, so defaults to 0
         except (ValueError, TypeError):
-            return None
+            return 0
 
+    # Parses a save's display value into a numeric.
+    #   save:
+    #       the save to get bonuses for. integer (see Effect model).
+    # Returns a numeric. In order of preference, disp_save as an integer,
+    # disp_save as a float, disp_save with the first regex indicating a float
+    # ('[0-9]+(\.[0-9]+)*'), and 0.
     def base_save(self, save):
         disp_save = self.disp_saves[save]
+        # If we can, just turn it into a numeric
         try:
             return int(disp_save)
         except ValueError:
             try:
                 return float(disp_save)
+            # It doesn't turn into a numeric easily.
             except ValueError:
-                num_regex = re.compile('[0-9]+')
+                # Find the first float-like string in disp_save
+                num_regex = re.compile('[0-9]+(\.[0-9]+)*')
                 found = num_regex.search(disp_save)
+                # If it exists
                 if found:
-                    return int(found.group())
+                    return float(found.group())
+                # If there's something other than a number in disp_save
                 else:
-                    return None
+                    return 0
 
+    # Gets the final value for a save
+    #   save:
+    #       the save to get the final value for. integer (see Effect model).
+    # Returns an integer.
     def fin_save(self, save):
+        # Start with the base save bonus
         fin_save = self.base_save(save)
-        fin_save += self.ability_mod(self.fin_ability(self.ultimate_save_ability(save)))
+        # Add the key ability modifier
+        fin_save += self.ability_mod(self.fin_ability(
+            self.ultimate_save_ability(save)))
+        # Add all bonuses from effects.
         for bonus_type, modifiers in self.total_save_bonus(save).items():
             penalty, bonus = min(modifiers), max(modifiers)
             fin_save += penalty + bonus
@@ -468,17 +517,24 @@ class Sheet(models.Model):
     # and a maximum equal to the bonus of that type (0 if none).
     def total_ability_bonus(self, ability):
         bonuses = {}
+        # Cycle through all active effects
         for effect in self.active_effects:
+            # Get the ability bonuses for the effect
+            # {type: range(penalty, bonus)}
             effect_bonuses = self.effect_ability_bonus(ability, effect)
+            # Cycle through each bonus type, adding penalties and bonuses
             for bonus_type in effect_bonuses:
                 penalty = min(effect_bonuses[bonus_type])
                 bonus = max(effect_bonuses[bonus_type])
+                # If we've already had this bonus type from another effect, use
+                # the worst penalty and the best bonus.
                 if bonus_type in bonuses:
                     old_penalty = min(bonuses[bonus_type])
                     old_bonus = max(bonuses[bonus_type])
                     worst_penalty = min(old_penalty, penalty)
                     best_bonus = max(old_bonus, bonus)
                     bonuses[bonus_type] = range(worst_penalty, best_bonus)
+                # If we haven't had this bonus type, just add it to the list
                 else:
                     bonuses[bonus_type] = range(penalty, bonus + 1)
         return bonuses
@@ -492,17 +548,24 @@ class Sheet(models.Model):
     # and a maximum equal to the bonus of that type (0 if none).
     def total_skill_bonus(self, skill):
         bonuses = {}
+        # Cycle through all active effects
         for effect in self.active_effects:
+            # Get the skill bonuses for the effect {type: range(penalty, bonus)}
             effect_bonuses = self.effect_skill_bonus(skill, effect)
+            # Cycle through each bonus type, adding penalties and bonuses
             for bonus_type in effect_bonuses:
+                # Penalties and bonuses are stored as ranges.
                 penalty = min(effect_bonuses[bonus_type])
                 bonus = max(effect_bonuses[bonus_type])
+                # If we've already had this bonus type from another effect, use
+                # the worst penalty and the best bonus.
                 if bonus_type in bonuses:
                     old_penalty = min(bonuses[bonus_type])
                     old_bonus = max(bonuses[bonus_type])
                     worst_penalty = min(old_penalty, penalty)
                     best_bonus = max(old_bonus, bonus)
                     bonuses[bonus_type] = range(worst_penalty, best_bonus)
+                # If we haven't had this bonus type, just add it to the list
                 else:
                     bonuses[bonus_type] = range(penalty, bonus + 1)
         return bonuses
@@ -516,27 +579,43 @@ class Sheet(models.Model):
     # and a maximum equal to the bonus of that type (0 if none).
     def total_save_bonus(self, save):
         bonuses = {}
+        # Cycle through all active effects
         for effect in self.active_effects:
+            # Get the save bonuses for the effect {type: range(penalty, bonus)}
             effect_bonuses = self.effect_save_bonus(save, effect)
+            # Cycle through each bonus type, adding penalties and bonuses
             for bonus_type in effect_bonuses:
+                # Penalties and bonuses are stored as ranges.
                 penalty = min(effect_bonuses[bonus_type])
                 bonus = max(effect_bonuses[bonus_type])
+                # If we've already had this bonus type from another effect, use
+                # the worst penalty and the best bonus.
                 if bonus_type in bonuses:
                     old_penalty = min(bonuses[bonus_type])
                     old_bonus = max(bonuses[bonus_type])
                     worst_penalty = min(old_penalty, penalty)
                     best_bonus = max(old_bonus, bonus)
                     bonuses[bonus_type] = range(worst_penalty, best_bonus)
+                # If we haven't had this bonus type, just add it to the list
                 else:
                     bonuses[bonus_type] = range(penalty, bonus + 1)
         return bonuses
 
+    # Determines which ability will be used for a save
+    #   save:
+    #       the save to get the key ability. integer (see Effect model).
+    # Returns an integer indicating the key ability (see Effect model). In order
+    # of preference, the ability from the most recently added effect overriding
+    # the save ability, the default save ability.
     def ultimate_save_ability(self, save):
+        # Get the save override from all effects that have one.
         abilities = [effect.ultimate_save_override(save)
                      for effect in self.active_effects]
         abilities=list(filter((None,None).__ne__, abilities))
+        # Get the save override from the most recently added effect.
         try:
             abilities.sort(key=lambda t: t[1])
             return abilities[-1][0]
+        # There's no override; get the default
         except (IndexError, TypeError):
             return DEFAULT_SAVE_ABILITIES[save]
