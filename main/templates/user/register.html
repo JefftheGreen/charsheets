@@ -20,6 +20,11 @@
 			<h2>This username has alreayd been registered.</h2>
 		</div>
 		{% endif %}
+		{% if password_error %}
+		<div id="Password Error">
+			<h2>The passwords did not match.</h2>
+		</div>
+		{% endif %}
 		<form id="login" action="/register/" method="post">
 			{% csrf_token %}
 			{{ form.as_p }}

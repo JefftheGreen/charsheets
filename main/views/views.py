@@ -41,24 +41,33 @@ class LogoutView(View):
 class NewUserView(View):
     
     def get(self, request):
-        form = LoginForm()
+        form = RegisterForm()
         context = {'permission_error': False,
                    'duplicate_error': False,
+                   'password_error': False,
                    'form': form}
         return render(request, 'register.html', context)
         
     def post(self, request):
-        form = LoginForm(request.POST)
+        form = RegisterForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
+            confirm = form.cleaned_data['confirm_password']
             if username not in settings.USER_WHITELIST:
                 context = {'permission_error': True,
                            'duplicate_error': False,
+                           'password_error': False,
                            'form': form}
             elif len(User.objects.filter(username=username)) > 0:
                 context = {'permission_error': False,
                            'duplicate_error': True,
+                           'password_error': False,
+                           'form': form}
+            elif confirm != password:
+                context = {'permission_error': False,
+                           'duplicate_error': False,
+                           'password_error': True,
                            'form': form}
             else:
                 print("creating new user " + username)
