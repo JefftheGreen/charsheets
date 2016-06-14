@@ -17,7 +17,7 @@ class Sheet(models.Model):
     # The character name, displayed on the sheet
     char_name = models.CharField(max_length=200, default='')
     # The character race, displayed on the sheet
-    race = models.CharField(max_length=200, default='', default='')
+    race = models.CharField(max_length=200, default='')
     # The character classes, displayed on the sheet
     classes = models.CharField(max_length=200)
     # The character's gender, displayed on the sheet

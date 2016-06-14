@@ -11,9 +11,12 @@
 		<div id="Error">
 			<h2>Logout failed.</h2>
 		</div>
-		{% elif %}
+		{% else %}
         <div id="Home">
-            <h2><a href="{% url 'home' %}">Return home</a></h2>
+            <h2>
+                Logout successful.
+                <a href="{% url 'home' %}">Click to return home</a>
+            </h2>
         </div>
 		{% endif %}
 	</body>
