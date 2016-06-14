@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from main.default_data import DEFAULT_SAVE_ABILITIES
+from main.default_data import DEFAULT_SAVE_ABILITIES, DEFAULT_SKILL_IDS
+from . import misc
 import re
 
 
@@ -12,43 +13,43 @@ class Sheet(models.Model):
     # The time the effect was created
     date = models.DateTimeField(default=timezone.now)
     # The name of the sheet, displayed where the sheet is referred to
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, default='')
     # The character name, displayed on the sheet
-    char_name = models.CharField(max_length=200)
+    char_name = models.CharField(max_length=200, default='')
     # The character race, displayed on the sheet
-    race = models.CharField(max_length=200)
+    race = models.CharField(max_length=200, default='', default='')
     # The character classes, displayed on the sheet
     classes = models.CharField(max_length=200)
     # The character's gender, displayed on the sheet
-    gender = models.CharField(max_length=200)
+    gender = models.CharField(max_length=200, default='')
     # The character's alignment, displayed on the sheet
-    alignment = models.CharField(max_length=200)
+    alignment = models.CharField(max_length=200, default='')
     # The character's deity, displayed on the sheet
-    deity = models.CharField(max_length=200)
+    deity = models.CharField(max_length=200, default='')
     # The campaign the character is for, displayed on the sheet
-    campaign = models.CharField(max_length=200)
+    campaign = models.CharField(max_length=200, default='')
     # The character's age, displayed on the sheet
-    age = models.CharField(max_length=200)
+    age = models.CharField(max_length=200, default='')
     # The character's size, displayed on the sheet, and parsed for calculations
-    _size = models.CharField(max_length=200)
+    _size = models.CharField(max_length=200, default='')
     # The character's Str, displayed on the sheet, and parsed for calculations
-    disp_base_str = models.CharField(max_length=5)
+    disp_base_str = models.CharField(max_length=5, default='')
     # The character's Dex, displayed on the sheet, and parsed for calculations
-    disp_base_dex = models.CharField(max_length=5)
+    disp_base_dex = models.CharField(max_length=5, default='')
     # The character's Con, displayed on the sheet, and parsed for calculations
-    disp_base_con = models.CharField(max_length=5)
+    disp_base_con = models.CharField(max_length=5, default='')
     # The character's Int, displayed on the sheet, and parsed for calculations
-    disp_base_int = models.CharField(max_length=5)
+    disp_base_int = models.CharField(max_length=5, default='')
     # The character's Wis, displayed on the sheet, and parsed for calculations
-    disp_base_wis = models.CharField(max_length=5)
+    disp_base_wis = models.CharField(max_length=5, default='')
     # The character's Cha, displayed on the sheet, and parsed for calculations
-    disp_base_cha = models.CharField(max_length=5)
+    disp_base_cha = models.CharField(max_length=5, default='')
     # The character's Will, displayed on the sheet, and parsed for calculations
-    disp_base_will = models.CharField(max_length=5)
+    disp_base_will = models.CharField(max_length=5, default='0')
     # The character's Ref, displayed on the sheet, and parsed for calculations
-    disp_base_ref = models.CharField(max_length=5)
+    disp_base_ref = models.CharField(max_length=5, default='0')
     # The character's Fort, displayed on the sheet, and parsed for calculations
-    disp_base_fort = models.CharField(max_length=5)
+    disp_base_fort = models.CharField(max_length=5, default='0')
     # Whether the character is blinded
     blinded = models.BooleanField(default=False)
     # Whether the character is confused
@@ -111,7 +112,7 @@ class Sheet(models.Model):
 
     @property
     def disp_saves(self):
-        return (self.disp_base_fort, self.disp_base_ref, self.disp_base_will)
+        return self.disp_base_fort, self.disp_base_ref, self.disp_base_will
         
     # The character's base Str, used in calculations. numeric
     @property
@@ -375,8 +376,6 @@ class Sheet(models.Model):
             penalty, bonus = min(modifiers), max(modifiers)
             fin_save += penalty + bonus
         return fin_save
-
-
 
     # Gets the bonuses and penalties for an ability from a single effect
     #   ability:

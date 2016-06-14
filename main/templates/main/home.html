@@ -4,23 +4,11 @@
         <title>Character Sheet Home</title>
     </head>
     <body>
-        <h1>Default Skills</h1>
-        <div id="SkillList">
-            <ul>
-            {% for skill, subskills in skills %}
-                <li>
-                    {{ skill }} ({{ skill.get_default_stat_display }})
-                </li>
-                <ul>
-                {% for subskill in subskills %}
-                    <li>
-                        {{ subskill.name }} 
-                        ({{ subskill.get_default_stat_display }})
-                    </li>
-                {% endfor %}
-                </ul>
-            {% endfor %}
-            </ul>
+        <h1>Welcome! This is the test homepage for Jeff's new character
+        sheets!</h1>
+        <div id="Manage">
+            <a href="{% url 'login' %}">Log in</a>
+            <a href="{% url 'register' %}">Register new user (invite only)</a>
         </div>
     </body>
 </html>

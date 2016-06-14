@@ -189,7 +189,8 @@ ABILITY_CHOICES = (
     (CHA, 'Charisma')
 )
 
-def main():
+
+def create_default_skills():
     from .models import Skill
     skill_id = 1
     for s in SKILL_DEFAULTS_3_5:

@@ -32,6 +32,12 @@ class LoginView(View):
                                                       'form': form})
 
 
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return render(request, 'logout.html', {'error': False})
+
+
 class NewUserView(View):
     
     def get(self, request):

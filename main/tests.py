@@ -4,7 +4,7 @@ from main.default_data import main
 from collections import defaultdict
 
 
-class Effect_Test(TestCase):
+class EffectTest(TestCase):
     
     def setUp(self):
         main()

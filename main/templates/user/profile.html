@@ -14,10 +14,14 @@
             {% endfor %}
             </ul>
         </div>
-        <form id="login" action="/profile/" method="post">
+        <form id="new sheet" action="/profile/" method="post">
 			{% csrf_token %}
 			{{ form.as_table }}
 			<input type="submit" value="New Sheet" />
 		</form>
+        <div id="management">
+            <a href="{% url 'pwd_reset' %}">Reset password</a>
+            <a href="{% url 'logout' %}">Log out</a>
+        </div>
     </body>
 </html>
