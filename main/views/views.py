@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from django.conf import settings
 from main.models import Sheet, Skill
 from .forms import *
+from .sheet_form import *
 
 
 class LoginView(View):
@@ -121,13 +122,28 @@ class ProfileView(View):
             name = form.cleaned_data['name']
             type = form.cleaned_data['type']
             sheet = Sheet(name=name, owner=request.user)
-            sheet.initialize()
             sheet.save()
         form = NewSheetForm()
         context = {'user': request.user,
                    'sheet_list': Sheet.objects.filter(owner=request.user),
                    'form': form}
         return render(request, 'profile.html', context)
+
+
+class SheetView(View):
+
+    @property
+    def sheet(self):
+        try:
+            return Sheet.objects.get(id=int(self.kwargs['id']))
+        except:
+            return None
+
+    def get(self, request, **kwargs):
+        form = SheetForm(instance=self.sheet)
+        context = {'sheet': self.sheet,
+                   'form': form}
+        return render(request, 'sheet.html', context)
 
 
 def home_view(request):

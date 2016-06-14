@@ -30,7 +30,7 @@ class Sheet(models.Model):
     # The character's age, displayed on the sheet
     age = models.CharField(max_length=200, default='')
     # The character's size, displayed on the sheet, and parsed for calculations
-    _size = models.CharField(max_length=200, default='')
+    disp_size = models.CharField(max_length=200, default='')
     # The character's Str, displayed on the sheet, and parsed for calculations
     disp_base_str = models.CharField(max_length=5, default='')
     # The character's Dex, displayed on the sheet, and parsed for calculations
@@ -177,6 +177,8 @@ class Sheet(models.Model):
     @property
     def fin_str(self):
         fin_str = self.fin_ability(0)
+        if fin_str is None:
+            return fin_str
         # Apply fatigue/exhaustion penalties
         fin_str += [0, -2, -6][self.fatigue_degree]
         fin_str = 0 if self.paralyzed else fin_str
@@ -186,6 +188,8 @@ class Sheet(models.Model):
     @property
     def fin_dex(self):
         fin_dex = self.fin_ability(1)
+        if fin_dex is None:
+            return fin_dex
         # Apply fatigue/exhaustion penalties
         fin_dex += [0, -2, -6][self.fatigue_degree]
         fin_dex = 0 if self.paralyzed or self.helpless else fin_dex

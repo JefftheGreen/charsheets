@@ -8,7 +8,7 @@
         <div id="sheet list">
             <ul>
             {% for sheet in sheet_list %}
-                <li>{{ sheet.name }} (3.5e)</li>
+                <li><a href="{% url 'sheet' id=sheet.id %}">{{ sheet.name }}</a> (3.5e)</li>
             {% empty %}
                 You have no sheets.
             {% endfor %}
@@ -20,8 +20,8 @@
 			<input type="submit" value="New Sheet" />
 		</form>
         <div id="management">
-            <a href="{% url 'pwd_reset' %}">Reset password</a>
-            <a href="{% url 'logout' %}">Log out</a>
+            <p><a href="{% url 'pwd_reset' %}">Reset password</a></p>
+            <p><a href="{% url 'logout' %}">Log out</a></p>
         </div>
     </body>
 </html>

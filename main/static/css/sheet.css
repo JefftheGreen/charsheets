@@ -1,0 +1,10 @@
+#abilities {width: 20%;
+            background-color: red;}
+
+.ability-group {float: left;
+                background-color: lightblue;
+                width: 100%}
+
+.ability-group div {float: left;
+                    padding: 1em 1em 1em 1em;
+                    width: 20%;}

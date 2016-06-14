@@ -25,5 +25,6 @@ urlpatterns = patterns('',
     url(r'^password_reset/$', views.PasswordResetView.as_view(),
         name='pwd_reset'),
     url(r'^register/$', views.NewUserView.as_view(), name='register'),
-    url(r'^profile/$', views.ProfileView.as_view(), name='profile')
+    url(r'^profile/$', views.ProfileView.as_view(), name='profile'),
+    url(r'^sheet/(?P<id>[0-9]+)/$', views.SheetView.as_view(), name='sheet')
 )
