@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta id="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ sheet.name }}</title>
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
@@ -12,112 +12,236 @@
 </head>
 <body>
     <h1>{{ sheet.name }}</h1>
-    <form id="sheet">
+    <form id="sheet" method="post">
         {% csrf_token %}
-        <div class="" id="abilities">
-            <div class="ability-group" id="str group">
-                <div class="ability-label"><h2>Strength</h2></div>
-                <div class="ability base" id="str base">
+        <div id="abilities">
+            <div class="table-labels" id="ability-table-labels">
+                <div class="ability-table-label" id="ability-label">
+                </div>
+                <div class="ability-table-label" id="ability-base-label">
+                    <div>Score</div>
+                </div>
+                <div class="ability-table-label" id="ability-base-mod-label">
+                    <div>Mod</div>
+                </div>
+                <div class="ability-table-label" id="ability-total-label">
+                    <div>Temp Score</div>
+                </div>
+                <div class="ability-table-label" id="ability-total-mod-label">
+                    <div>Temp Mod</div>
+                </div>
+            </div>
+            <div class="ability-group" id="str-group">
+                <div class="ability-label" id="str-label">
+                    <span>STR</span>
+                </div>
+                <div class="ability-base" id="str-base">
                     {{ form.disp_base_str.errors }}
-                    {{ form.disp_base_str.label_tag }}
                     {{ form.disp_base_str }}
                 </div>
-                <div class="ability base mod" id="str base mod">
-                    <p>{{ sheet.base_str_mod }}</p>
+                <div class="ability-base-mod" id="str-base-mod">
+                    <span>{{ sheet.base_str_mod }}</span>
                 </div>
-                <div class="ability total" id="str total">
-                    <p>{{ sheet.fin_str }}</p>
+                <div class="ability-total" id="str-total">
+                    <span>{{ sheet.fin_str }}</span>
                 </div>
-                <div class="ability total mod" id="str total mod">
-                    <p>{{ sheet.fin_str_mod }}</p>
+                <div class="ability-total-mod" id="str-total-mod">
+                    <span>{{ sheet.fin_str_mod }}</span>
                 </div>
             </div>
-            <div class="ability-group" id="dex group">
-                <div class="ability-label"><h2>Dexterity</h2></div>
-                <div class="ability base" id="dex base">
+            <div class="ability-group" id="dex-group">
+                <div class="ability-label" id="dex-label">
+                    <span>DEX</span>
+                </div>
+                <div class="ability-base" id="dex-base">
                     {{ form.disp_base_dex.errors }}
-                    {{ form.disp_base_dex.label_tag }}
                     {{ form.disp_base_dex }}
                 </div>
-                <div class="ability base mod" id="dex base mod">
-                    <p>{{ sheet.base_dex_mod }}</p>
+                <div class="ability-base-mod" id="dex-base-mod">
+                    <span>{{ sheet.base_dex_mod }}</span>
                 </div>
-                <div class="ability total" id="dex total">
-                    <p>{{ sheet.fin_dex }}</p>
+                <div class="ability-total" id="dex-total">
+                    <span>{{ sheet.fin_dex }}</span>
                 </div>
-                <div class="ability total mod" id="dex total mod">
-                    <p>{{ sheet.fin_dex_mod }}</p>
+                <div class="ability-total-mod" id="dex-total-mod">
+                    <span>{{ sheet.fin_dex_mod }}</span>
                 </div>
             </div>
-            <div class="ability-group" id="con group">
-                <div class="ability-label"><h2>Constitution</h2></div>
-                <div class="ability base" id="con base">
+            <div class="ability-group" id="con-group">
+                <div class="ability-label" id="con-label">
+                    <span>CON</span>
+                </div>
+                <div class="ability-base" id="con-base">
                     {{ form.disp_base_con.errors }}
-                    {{ form.disp_base_con.label_tag }}
                     {{ form.disp_base_con }}
                 </div>
-                <div class="ability base mod" id="con base mod">
-                    <p>{{ sheet.base_con_mod }}</p>
+                <div class="ability-base-mod" id="con-base-mod">
+                    <span>{{ sheet.base_con_mod }}</span>
                 </div>
-                <div class="ability total" id="con total">
-                    <p>{{ sheet.fin_con }}</p>
+                <div class="ability-total" id="con-total">
+                    <span>{{ sheet.fin_con }}</span>
                 </div>
-                <div class="ability total mod" id="con total mod">
-                    <p>{{ sheet.fin_con_mod }}</p>
+                <div class="ability-total-mod" id="con-total-mod">
+                    <span>{{ sheet.fin_con_mod }}</span>
                 </div>
             </div>
-            <div class="ability-group" id="int group">
-                <div class="ability-label"><h2>Intelligence</h2></div>
-                <div class="ability base" id="int base">
+            <div class="ability-group" id="int-group">
+                <div class="ability-label" id="int-label">
+                    <span>INT</span>
+                </div>
+                <div class="ability-base" id="int-base">
                     {{ form.disp_base_int.errors }}
-                    {{ form.disp_base_int.label_tag }}
                     {{ form.disp_base_int }}
                 </div>
-                <div class="ability base mod" id="int base mod">
-                    <p>{{ sheet.base_int_mod}}</p>
+                <div class="ability-base-mod" id="int-base-mod">
+                    <span>{{ sheet.base_int_mod}}</span>
                 </div>
-                <div class="ability total" id="int total">
-                    <p>{{ sheet.fin_int}}</p>
+                <div class="ability-total" id="int-total">
+                    <span>{{ sheet.fin_int}}</span>
                 </div>
-                <div class="ability total mod" id="int total mod">
-                    <p>{{ sheet.fin_int_mod}}</p>
+                <div class="ability-total-mod" id="int-total-mod">
+                    <span>{{ sheet.fin_int_mod}}</span>
                 </div>
             </div>
-            <div class="ability-group" id="wis group">
-                <div class="ability-label"><h2>Wisdom</h2></div>
-                <div class="ability base" id="wis base">
+            <div class="ability-group" id="wis-group">
+                <div class="ability-label" id="wis-label">
+                    <span>WIS</span>
+                </div>
+                <div class="ability-base" id="wis-base">
                     {{ form.disp_base_wis.errors }}
-                    {{ form.disp_base_wis.label_tag }}
                     {{ form.disp_base_wis }}
                 </div>
-                <div class="ability base mod" id="wis base mod">
-                    <p>{{ sheet.base_wis_mod}}</p>
+                <div class="ability-base-mod" id="wis-base-mod">
+                    <span>{{ sheet.base_wis_mod}}</span>
                 </div>
-                <div class="ability total" id="wis total">
-                    <p>{{ sheet.fin_wis }}</p>
+                <div class="ability-total" id="wis-total">
+                    <span>{{ sheet.fin_wis }}</span>
                 </div>
-                <div class="ability total mod" id="wis total mod">
-                    <p>{{ sheet.fin_wis_mod }}</p>
+                <div class="ability-total-mod" id="wis-total-mod">
+                    <span>{{ sheet.fin_wis_mod }}</span>
                 </div>
             </div>
-            <div class="ability-group" id="cha group">
-                <div class="ability-label"><h2>Charisma</h2></div>
-                <div class="ability base" id="cha base">
+            <div class="ability-group" id="cha-group">
+                <div class="ability-label" id="cha-label">
+                    <span>CHA</span>
+                </div>
+                <div class="ability-base" id="cha-base">
                     {{ form.disp_base_cha.errors }}
-                    {{ form.disp_base_cha.label_tag }}
                     {{ form.disp_base_cha }}
                 </div>
-                <div class="ability base mod" id="cha base mod">
-                    <p>{{ sheet.base_cha_mod }}</p>
+                <div class="ability-base-mod" id="cha-base-mod">
+                    <span>{{ sheet.base_cha_mod }}</span>
                 </div>
-                <div class="ability total" id="cha total">
-                    <p>{{ sheet.fin_cha }}</p>
+                <div class="ability-total" id="cha-total">
+                    <span>{{ sheet.fin_cha }}</span>
                 </div>
-                <div class="ability total mod" id="cha total mod">
-                    <p>{{ sheet.fin_cha_mod }}</p>
+                <div class="ability-total-mod" id="cha-total-mod">
+                    <span>{{ sheet.fin_cha_mod }}</span>
                 </div>
             </div>
         </div>
+        <div id="conditions">
+            <div class="condition-group" id="ungrouped-conditions">
+                {% for field in form %}
+                {% if field.name in form.UNGROUPED_CONDITIONS %}
+                <div class="condition" id="{{ field.name }}">
+                    {{ field.errors }}
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% for group, conditions in form.CONDITION_GROUPS %}
+            <div class="condition-group" id="{{ group }}-degree">
+                <div class = "condition-group-label" id="{{ group }}-label">
+                    <span>{{ group }}</span>
+                </div>
+                {% for field in form %}
+                {% if field.name in conditions %}
+                <div class="condition" id="{{ field.name }}">
+                    {{ field.errors }}
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        <div id="saves">
+            <div class="table-labels" id="save-table-labels">
+                <div class="save-table-label" id="save-label">
+                </div>
+                <div class="save-table-label" id="save-total-label">
+                    <div>Total</div>
+                </div>
+                <div class="save-table-label" id="save-base-label">
+                    <div>Base</div>
+                </div>
+                <div class="save-table-label" id="save-ability-label">
+                    <div>Ability</div>
+                </div>
+                <div class="save-table-label" id="save-bonus-label">
+                    <div>Bonus</div>
+                </div>
+            </div>
+            <div class="save-group" id="fort-group">
+                <div class="save-label" id="fort-label">
+                    <div>FORT</div>
+                </div>
+                <div class="save-total" id="fort-total">
+                    <span>{{ sheet.fin_fort }}</span>
+                </div>
+                <div class="save-base" id="fort-base">
+                    {{ form.disp_base_fort.errors }}
+                    {{ form.disp_base_fort }}
+                </div>
+                <div class="save-ability" id="fort-ability">
+                    <span>{{ sheet.fort_ability_mod }}</span>
+                </div>
+                <div class="save-bonus" id="fort-bonus">
+                    <span>{{ sheet.fort_bonus }}</span>
+                </div>
+            </div>
+            <div class="save-group" id="ref-group">
+                <div class="save-label" id="ref-label">
+                    <div>REF</div>
+                </div>
+                <div class="save-total" id="ref-total">
+                    <span>{{ sheet.fin_ref }}</span>
+                </div>
+                <div class="save-base" id="ref-base">
+                    {{ form.disp_base_ref.errors }}
+                    {{ form.disp_base_ref }}
+                </div>
+                <div class="save-ability" id="ref-ability">
+                    <span>{{ sheet.ref_ability_mod }}</span>
+                </div>
+                <div class="save-bonus" id="ref-bonus">
+                    <span>{{ sheet.ref_bonus }}</span>
+                </div>
+            </div>
+            <div class="save-group" id="will-group">
+                <div class="save-label" id="will-label">
+                    <div>WILL</div>
+                </div>
+                <div class="save-total" id="will-total">
+                    <span>{{ sheet.fin_will }}</span>
+                </div>
+                <div class="save-base" id="will-base">
+                    {{ form.disp_base_will.errors }}
+                    {{ form.disp_base_will }}
+                </div>
+                <div class="save-ability" id="will-ability">
+                    <span>{{ sheet.will_ability_mod }}</span>
+                </div>
+                <div class="save-bonus" id="will-bonus">
+                    <span>{{ sheet.fort_bonus }}</span>
+                </div>
+            </div>
+        </div>
+        <input type="submit" value="Save" />
     </form>
 </body>
 </html>

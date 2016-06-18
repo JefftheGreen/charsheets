@@ -1,10 +1,283 @@
-#abilities {width: 20%;
-            background-color: red;}
+#abilities {
+    width: 17em;
+    height: 23em;
+    background-color: turquoise;
+    border: black solid thin;
+    border-radius: .75em
+}
 
-.ability-group {float: left;
-                background-color: lightblue;
-                width: 100%}
+.ability-table-label {
+    float: left;
+    display: table;
+    width: 3em;
+    height: 3em;
+    text-align: center;
+    margin: .1em;
+}
 
-.ability-group div {float: left;
-                    padding: 1em 1em 1em 1em;
-                    width: 20%;}
+.ability-table-label div {
+    display: table-cell;
+    vertical-align: bottom;
+}
+
+#ability-table-labels {
+    float: left;
+    width: 100%;
+}
+
+.ability-group {
+    float: left;
+    width: 100%;
+}
+
+.ability-label {
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.ability-base {
+    background-color: lightblue;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.ability-base-mod {
+    background-color: lightblue;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+    cursor: default;
+}
+
+.ability-total {
+    background-color: lightblue;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.ability-total-mod {
+    background-color: lightblue;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.ability-group div input {
+    width: 100%;
+    border: none;
+    background: none;
+    text-align: center;}
+
+.ability-group div span {
+    text-align: center;
+    vertical-align: middle;
+}
+
+#conditions {
+    background-color: pink;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    border: black solid thin;
+    margin: .1em;
+}
+
+.condition-group {
+    background-color: lightpink;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    border: black solid thin;
+    margin: .5em;
+    float: left;
+    padding: .5em
+}
+
+.condition-group-label {
+    margin-top: -1.2em;
+    float: none;
+}
+
+.condition-group-label span {
+    background-color: lightpink;
+    padding-right: .3em;
+    padding-left: .3em;
+}
+
+.condition {
+    width: 9em;
+}
+
+#ungrouped-conditions {
+    width: 50%;
+}
+
+#ungrouped-conditions .condition {
+    float: left;
+}
+
+#Fear-degree {
+    width: 20em
+}
+
+#Fear-degree .condition {
+    float: left;
+}
+
+#Fatigue-degree .condition {
+    clear: left;
+}
+
+#conditions .condition {
+    float: left;
+}
+
+#saves {
+    background-color: gold;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    width: 17em;
+    float: left;
+    border: black solid thin;
+    margin: .1em;
+
+}
+
+.save-group {
+    float: left;
+}
+
+.save-label {
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    background-color: yellow;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.save-base {
+    background-color: yellow;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.save-total {
+    background-color: yellow;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.save-base {
+    background-color: yellow;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.save-ability {
+    background-color: yellow;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.save-bonus {
+    background-color: yellow;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    width: 3em;
+    height: 3em;
+    border: black solid thin;
+    text-align: center;
+    line-height: 3em;
+    margin: .1em;
+}
+
+.save-group div input {
+    width: 100%;
+    border: none;
+    background: none;
+    text-align: center;}
+
+.save-table-label {
+    float: left;
+    display: table;
+    width: 3em;
+    height: 3em;
+    text-align: center;
+    margin: .1em;
+}
+
+.save-table-label div {
+    display: table-cell;
+    vertical-align: bottom;
+}
+
+#save-table-labels {
+    float: left;
+    width: 100%;
+}
