@@ -145,6 +145,16 @@ class SheetView(View):
                    'form': form}
         return render(request, 'sheet.html', context)
 
+    def post(self, request, **kwargs):
+        form = SheetForm(request.POST, instance=self.sheet)
+        print(form.errors)
+        form.save()
+        print(self.sheet.fatigue_degree)
+        new_form = SheetForm(instance=self.sheet)
+        context = {'sheet': self.sheet,
+                   'form': new_form}
+        return render(request, 'sheet.html', context)
+
 
 def home_view(request):
     skills = list([s for s in Skill.objects.all() if s.super_skill == None])

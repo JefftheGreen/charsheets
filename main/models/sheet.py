@@ -176,24 +176,12 @@ class Sheet(models.Model):
     # The character's Str, accounting for all effects. integer
     @property
     def fin_str(self):
-        fin_str = self.fin_ability(0)
-        if fin_str is None:
-            return fin_str
-        # Apply fatigue/exhaustion penalties
-        fin_str += [0, -2, -6][self.fatigue_degree]
-        fin_str = 0 if self.paralyzed else fin_str
-        return fin_str
+        return self.fin_ability(0)
     
     # The character's Dex, accounting for all effects. integer
     @property
     def fin_dex(self):
-        fin_dex = self.fin_ability(1)
-        if fin_dex is None:
-            return fin_dex
-        # Apply fatigue/exhaustion penalties
-        fin_dex += [0, -2, -6][self.fatigue_degree]
-        fin_dex = 0 if self.paralyzed or self.helpless else fin_dex
-        return fin_dex
+        return self.fin_ability(1)
     
     # The character's Con, accounting for all effects. integer
     @property
@@ -345,6 +333,9 @@ class Sheet(models.Model):
         # If we couldn't parse disp_ability, it's a non-ability
         if fin_ability is None:
             return None
+        if ability in [0, 1]:
+            fin_ability += [0, -2, -6][self.fatigue_degree]
+            fin_ability = 0 if self.paralyzed or self.helpless else fin_ability
         # Add all penalties and bonuses from effects
         for bonus_type, modifiers in self.total_ability_bonus(ability).items():
             penalty, bonus = min(modifiers), max(modifiers)
