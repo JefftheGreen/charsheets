@@ -260,6 +260,30 @@ class Sheet(models.Model):
     def base_will(self):
         return self.base_save(2)
 
+    @property
+    def fort_ability_mod(self):
+        return self.save_ability_mod(0)
+
+    @property
+    def ref_ability_mod(self):
+        return self.save_ability_mod(1)
+
+    @property
+    def will_ability_mod(self):
+        return self.save_ability_mod(2)
+
+    @property
+    def fort_bonus(self):
+        return self.save_bonus(0)
+
+    @property
+    def ref_bonus(self):
+        return self.save_bonus(1)
+
+    @property
+    def will_bonus(self):
+        return self.save_bonus(2)
+
     # The character's base Fortitude save, used in calculations. numeric
     @property
     def fin_fort(self):
@@ -364,6 +388,18 @@ class Sheet(models.Model):
                 else:
                     return 0
 
+    def save_ability_mod(self, save):
+        return self.ability_mod(self.fin_ability(
+            self.ultimate_save_ability(save)))
+
+    def save_bonus(self, save):
+        total_bonus = 0
+        # Add all bonuses from effects.
+        for bonus_type, modifiers in self.total_save_bonus(save).items():
+            penalty, bonus = min(modifiers), max(modifiers)
+            total_bonus += penalty + bonus
+        return total_bonus
+
     # Gets the final value for a save
     #   save:
     #       the save to get the final value for. integer (see Effect model).
@@ -372,12 +408,9 @@ class Sheet(models.Model):
         # Start with the base save bonus
         fin_save = self.base_save(save)
         # Add the key ability modifier
-        fin_save += self.ability_mod(self.fin_ability(
-            self.ultimate_save_ability(save)))
-        # Add all bonuses from effects.
-        for bonus_type, modifiers in self.total_save_bonus(save).items():
-            penalty, bonus = min(modifiers), max(modifiers)
-            fin_save += penalty + bonus
+        fin_save += self.save_ability_mod(save)
+        # Add all the bonuses
+        fin_save += self.save_bonus(save)
         return fin_save
 
     # Gets the bonuses and penalties for an ability from a single effect
