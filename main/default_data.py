@@ -189,6 +189,54 @@ ABILITY_CHOICES = (
     (CHA, 'Charisma')
 )
 
+DEFAULT_CONDITION_EFFECTS = {'blinded': (('ac', -2),
+                                         ('no dex to ac', True),
+                                         ('skill', ('Search', -4)),
+                                         ('ability skill', (0, -4)),
+                                         ('ability skill', (1, -4))),
+                             'cowering': (('ac', -2),
+                                          ('no dex to ac', True)),
+                             'dazzled': (('attack', -1),
+                                         ('skill', ('Search', -1)),
+                                         ('skill', ('Spot', -1))),
+                             'deafened': (('initiative', -4),),
+                             'entangled': (('attack', -2),
+                                           ('ability', (1, -4))),
+                             'exhausted': (('ability', (0, -6)),
+                                           ('ability', (1, -6))),
+                             'fatigued': (('ability', (0, -2)),
+                                          ('ability', (1, -2))),
+                             'flat-footed': (('no dex to ac', True),),
+                             'frightened': (('attack', -2),
+                                            ('save', (0, -2)),
+                                            ('save', (1, -2)),
+                                            ('save', (2, -2)),
+                                            ('skill', ('all', -2))),
+                             'grappling': (('no dex to ac', True),),
+                             'helpless': (('ability equals', (1, 0)),),
+                             'panicked': (('attack', -2),
+                                          ('save', (0, -2)),
+                                          ('save', (1, -2)),
+                                          ('save', (2, -2)),
+                                          ('skill', ('all', -2))),
+                             'paralyzed': (('ability equals', (0, 0)),
+                                           ('ability equals', (1, 0))),
+                             'petrified': (('ability equals', (1, 0)),),
+                             'prone': (('melee', -4),),
+                             'shaken': (('attack', -2),
+                                        ('save', (0, -2)),
+                                        ('save', (1, -2)),
+                                        ('save', (2, -2)),
+                                        ('skill', ('all', -2))),
+                             'sickened': (('attack', -2),
+                                          ('save', (0, -2)),
+                                          ('save', (1, -2)),
+                                          ('save', (2, -2)),
+                                          ('skill', ('all', -2))),
+                             'stunned': (('ac', -2),
+                                         ('no dex to ac', True)),
+                             'unconscious': (('ability equals', (1, 0)),)}
+
 
 def create_default_skills():
     from .models import Skill
@@ -203,6 +251,73 @@ def create_default_skills():
         if s == "Knowledge":
             for ss in SUBSKILLS[s]:
                 sub_skill = Skill(rename=False, acp=acp, default_stat=ability,
-                              name=ss, super_skill=skill, id=skill_id)
+                                  name=ss, super_skill=skill, id=skill_id)
                 sub_skill.save()
                 skill_id += 1
+
+
+def create_conditions():
+    from .models import Condition
+    import warnings
+    condition_id = 1
+    for condition in DEFAULT_CONDITION_EFFECTS:
+        c = Condition(id=condition_id, name=condition)
+        c.save()
+        condition_id += 1
+    for condition in DEFAULT_CONDITION_EFFECTS:
+        for effect, value in DEFAULT_CONDITION_EFFECTS[condition]:
+            if effect == 'ac':
+                c = Condition(parent_effect=
+                                Condition.objects.get(name=condition),
+                              ac_bonus=True, bonus_amount=value)
+                c.save()
+            elif effect == 'no dex to ac':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              no_dex_to_ac=True)
+                c.save()
+            elif effect == 'skill':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              skill_bonus=value[0], bonus_amount=value[1])
+                c.save()
+            elif effect == 'ability skill':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              ability_skill_bonus=value[0],
+                              bonus_amount=value[1])
+                c.save()
+            elif effect == 'attack':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              attack_bonus=2, bonus_amount=value)
+                c.save()
+            elif effect == 'initiative':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              initiative_bonus=True, bonus_amount=value)
+                c.save()
+            elif effect == 'ability equals':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              ability_set=value[0], bonus_amount=value[1])
+                c.save()
+            elif effect == 'ability':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              ability_bonus=value[0], bonus_amount=value[1])
+                c.save()
+            elif effect == 'melee':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              attack_bonus=0, bonus_amount=value)
+                c.save()
+            elif effect == 'save':
+                c = Condition(parent_effect=
+                              Condition.objects.get(name=condition),
+                              save_bonus=value[0], bonus_amount=value[1])
+                c.save()
+            else:
+                w = ("Condition {0} has an unrecognized effect"
+                     .format(condition))
+                warnings.warn(w, RuntimeWarning)
