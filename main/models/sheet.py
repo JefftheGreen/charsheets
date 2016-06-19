@@ -1,12 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from main.default_data import DEFAULT_SAVE_ABILITIES
+from main.default_data import DEFAULT_SAVE_ABILITIES, DEFAULT_CONDITION_EFFECTS
+from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
+from main.models.effect import Condition
+from django.utils.functional import cached_property
 import re
 
 
 class Sheet(models.Model):
 
+    # TODO: Figure out which fields to index
     # The user that created the sheet
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     # The time the effect was created
@@ -99,47 +103,49 @@ class Sheet(models.Model):
     turned = models.BooleanField(default=False)
     # Whether the character is unconscious
     unconscious = models.BooleanField(default=False)
+    # Whether the character is cowering
+    cowering = models.BooleanField(default=False)
     # Whether the character is fatigued 0=normal, 1=fatigued, 2=exhausted
     fatigue_degree = models.IntegerField(null=False, default=0)
     # How much fear 0=normal, 1=shaken, 2=frightened, 3=panicked, 4=cowering
     fear_degree = models.IntegerField(null=False, default=0)
 
-    @property
+    @cached_property
     def disp_abilities(self):
         return (self.disp_base_str, self.disp_base_dex, self.disp_base_con,
                 self.disp_base_int, self.disp_base_wis, self.disp_base_cha)
 
-    @property
+    @cached_property
     def disp_saves(self):
         return self.disp_base_fort, self.disp_base_ref, self.disp_base_will
         
     # The character's base Str, used in calculations. numeric
-    @property
+    @cached_property
     def base_str(self):
         return self.base_ability(0)
     
     # The character's base Dex, used in calculations. numeric
-    @property
+    @cached_property
     def base_dex(self):
         return self.base_ability(1)
     
     # The character's base Con, used in calculations. numeric
-    @property
+    @cached_property
     def base_con(self):
         return self.base_ability(2)
     
     # The character's base Int, used in calculations. numeric
-    @property
+    @cached_property
     def base_int(self):
         return self.base_ability(3)
     
     # The character's base Wis, used in calculations. numeric
-    @property
+    @cached_property
     def base_wis(self):
         return self.base_ability(4)
     
     # The character's base Cha, used in calculations. numeric
-    @property
+    @cached_property
     def base_cha(self):
         return self.base_ability(5)
     
@@ -169,37 +175,37 @@ class Sheet(models.Model):
         return self.ability_mod(self.base_wis)
     
     # The character's base Cha modifier, calculated from base_cha. integer
-    @property
+    @cached_property
     def base_cha_mod(self):
         return self.ability_mod(self.base_cha)
     
     # The character's Str, accounting for all effects. integer
-    @property
+    @cached_property
     def fin_str(self):
         return self.fin_ability(0)
     
     # The character's Dex, accounting for all effects. integer
-    @property
+    @cached_property
     def fin_dex(self):
         return self.fin_ability(1)
     
     # The character's Con, accounting for all effects. integer
-    @property
+    @cached_property
     def fin_con(self):
         return self.fin_ability(2)
     
     # The character's Int, accounting for all effects. integer
-    @property
+    @cached_property
     def fin_int(self):
         return self.fin_ability(3)
     
     # The character's Wis, accounting for all effects. integer
-    @property
+    @cached_property
     def fin_wis(self):
         return self.fin_ability(4)
     
     # The character's Cha, accounting for all effects. integer
-    @property
+    @cached_property
     def fin_cha(self):
         return self.fin_ability(5)
     
@@ -234,67 +240,92 @@ class Sheet(models.Model):
         return self.ability_mod(self.fin_cha)
 
     # The character's base Fortitude save, used in calculations. numeric
-    @property
+    @cached_property
     def base_fort(self):
         return self.base_save(0)
 
     # The character's base Fortitude save, used in calculations. numeric
-    @property
+    @cached_property
     def base_ref(self):
         return self.base_save(1)
 
     # The character's base Fortitude save, used in calculations. numeric
-    @property
+    @cached_property
     def base_will(self):
         return self.base_save(2)
 
-    @property
+    @cached_property
     def fort_ability_mod(self):
         return self.save_ability_mod(0)
 
-    @property
+    @cached_property
     def ref_ability_mod(self):
         return self.save_ability_mod(1)
 
-    @property
+    @cached_property
     def will_ability_mod(self):
         return self.save_ability_mod(2)
 
-    @property
+    @cached_property
     def fort_bonus(self):
         return self.save_bonus(0)
 
-    @property
+    @cached_property
     def ref_bonus(self):
         return self.save_bonus(1)
 
-    @property
+    @cached_property
     def will_bonus(self):
         return self.save_bonus(2)
 
     # The character's base Fortitude save, used in calculations. numeric
-    @property
+    @cached_property
     def fin_fort(self):
         return self.fin_save(0)
 
     # The character's base Fortitude save, used in calculations. numeric
-    @property
+    @cached_property
     def fin_ref(self):
         return self.fin_save(1)
 
     # The character's base Fortitude save, used in calculations. numeric
-    @property
+    @cached_property
     def fin_will(self):
         return self.fin_save(2)
 
     # The character's base Fortitude save, used in calculations. numeric
-    @property
+    @cached_property
     def active_effects(self):
         raw_effects = list(self.effect_set.filter(active=True))
         feat_effects = []#[f.effect for f in self.feat_set.all()]
         # TODO: Figure out how to implement item properties here.
         item_effects = []
-        return raw_effects + feat_effects + item_effects
+        return (raw_effects + feat_effects +
+                item_effects + self.active_conditions)
+
+    @cached_property
+    def active_conditions(self):
+        conditions = {}
+        active = []
+        for condition in DEFAULT_CONDITION_EFFECTS:
+            try:
+                if self._meta.get_field(condition).value_to_string(self) == 'True':
+                    active.append(Condition.objects.get(name=condition))
+            except (FieldDoesNotExist, ObjectDoesNotExist):
+                pass
+        if self.fatigue_degree == 1:
+            active.append(Condition.objects.get(name='fatigued'))
+        elif self.fatigue_degree == 2:
+            active.append(Condition.objects.get(name='exhausted'))
+        if self.fear_degree == 1:
+            active.append(Condition.objects.get(name='shaken'))
+        elif self.fear_degree == 2:
+            active.append(Condition.objects.get(name='frightened'))
+        elif self.fear_degree == 3:
+            active.append(Condition.objects.get(name='panicked'))
+        print([a.name for a in active])
+        return active
+
 
     # Parses an ability's display value into a numeric.
     #   ability:
@@ -333,13 +364,12 @@ class Sheet(models.Model):
         # If we couldn't parse disp_ability, it's a non-ability
         if fin_ability is None:
             return None
-        if ability in [0, 1]:
-            fin_ability += [0, -2, -6][self.fatigue_degree]
-            fin_ability = 0 if self.paralyzed or self.helpless else fin_ability
         # Add all penalties and bonuses from effects
+        print(ability, self.total_ability_bonus(ability))
         for bonus_type, modifiers in self.total_ability_bonus(ability).items():
             penalty, bonus = min(modifiers), max(modifiers)
             fin_ability += penalty + bonus
+        print(ability, self.base_ability(ability), fin_ability)
         return fin_ability
 
     # Gets the ability modifier for an ability. (ability - 10) / 2
@@ -548,6 +578,7 @@ class Sheet(models.Model):
             # Get the ability bonuses for the effect
             # {type: range(penalty, bonus)}
             effect_bonuses = self.effect_ability_bonus(ability, effect)
+            print(effect.name, effect_bonuses)
             # Cycle through each bonus type, adding penalties and bonuses
             for bonus_type in effect_bonuses:
                 penalty = min(effect_bonuses[bonus_type])

@@ -189,6 +189,15 @@ ABILITY_CHOICES = (
     (CHA, 'Charisma')
 )
 
+DEFAULT_CONDITIONS = ['blinded', 'confused', 'dazed', 'dazzled', 'deafened',
+                      'disabled', 'dying', 'entangled', 'fascinated',
+                      'flat_footed', 'grappling', 'helpless', 'incorporeal',
+                      'invisible', 'nauseated', 'paralyzed', 'petrified',
+                      'pinned', 'prone', 'sickened', 'stable', 'staggered',
+                      'stunned', 'turned', 'unconscious', 'fatigued',
+                      'exhausted', 'shaken', 'frightened', 'panicked',
+                      'cowering']
+
 DEFAULT_CONDITION_EFFECTS = {'blinded': (('ac', -2),
                                          ('no dex to ac', True),
                                          ('skill', ('Search', -4)),
@@ -206,7 +215,7 @@ DEFAULT_CONDITION_EFFECTS = {'blinded': (('ac', -2),
                                            ('ability', (1, -6))),
                              'fatigued': (('ability', (0, -2)),
                                           ('ability', (1, -2))),
-                             'flat-footed': (('no dex to ac', True),),
+                             'flat_footed': (('no dex to ac', True),),
                              'frightened': (('attack', -2),
                                             ('save', (0, -2)),
                                             ('save', (1, -2)),
@@ -259,11 +268,9 @@ def create_default_skills():
 def create_conditions():
     from .models import Condition
     import warnings
-    condition_id = 1
     for condition in DEFAULT_CONDITION_EFFECTS:
-        c = Condition(id=condition_id, name=condition)
+        c = Condition(name=condition)
         c.save()
-        condition_id += 1
     for condition in DEFAULT_CONDITION_EFFECTS:
         for effect, value in DEFAULT_CONDITION_EFFECTS[condition]:
             if effect == 'ac':
@@ -321,3 +328,7 @@ def create_conditions():
                 w = ("Condition {0} has an unrecognized effect"
                      .format(condition))
                 warnings.warn(w, RuntimeWarning)
+
+def setup():
+    create_conditions()
+    create_default_skills()

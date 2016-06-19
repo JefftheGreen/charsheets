@@ -152,19 +152,17 @@
                 {% endif %}
                 {% endfor %}
             </div>
-            {% for group, conditions in form.CONDITION_GROUPS %}
+            {% for group, conditions in form.condition_groups %}
             <div class="condition-group" id="{{ group }}-degree">
                 <div class = "condition-group-label" id="{{ group }}-label">
                     <span>{{ group }}</span>
                 </div>
-                {% for field in form %}
-                {% if field.name in conditions %}
+                {% for field in conditions %}
                 <div class="condition" id="{{ field.name }}">
                     {{ field.errors }}
                     {{ field.label_tag }}
                     {{ field }}
                 </div>
-                {% endif %}
                 {% endfor %}
             </div>
             {% endfor %}

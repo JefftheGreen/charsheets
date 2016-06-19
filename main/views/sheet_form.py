@@ -17,6 +17,12 @@ class SheetForm(forms.ModelForm):
                                  'cowering']),
                        ('Fatigue', ['fatigued', 'exhausted'])]
 
+    fatigued = forms.BooleanField(required=False)
+    exhausted = forms.BooleanField(required=False)
+    shaken = forms.BooleanField(required=False)
+    frightened = forms.BooleanField(required=False)
+    panicked = forms.BooleanField(required=False)
+
     class Meta:
         model = Sheet
         fields = [#'char_name', 'race', 'classes', 'gender', 'alignment',
@@ -29,14 +35,8 @@ class SheetForm(forms.ModelForm):
                   'entangled', 'fascinated', 'flat_footed', 'grappling',
                   'helpless', 'incorporeal', 'invisible', 'nauseated',
                   'paralyzed', 'petrified', 'pinned', 'prone', 'sickened',
-                  'stable', 'staggered', 'stunned', 'turned', 'unconscious']
+                  'stable', 'staggered', 'stunned', 'turned', 'unconscious', 'cowering']
 
-    fatigued = forms.BooleanField(required=False)
-    exhausted = forms.BooleanField(required=False)
-    shaken = forms.BooleanField(required=False)
-    frightened = forms.BooleanField(required=False)
-    panicked = forms.BooleanField(required=False)
-    cowering = forms.BooleanField(required=False)
 
     def __init__(self, *args, **kwargs):
         if 'instance' in kwargs:
@@ -47,7 +47,6 @@ class SheetForm(forms.ModelForm):
             initial['shaken'] = sheet.fear_degree == 1
             initial['frightened'] = sheet.fear_degree == 2
             initial['panicked'] = sheet.fear_degree == 3
-            initial['cowering'] = sheet.fear_degree == 4
             kwargs['initial'] = initial
         super().__init__(*args, **kwargs)
 
@@ -58,10 +57,14 @@ class SheetForm(forms.ModelForm):
 
     @property
     def fear_degree(self):
-        return (4 if self['cowering'].value()
-                else 3 if self['panicked'].value()
+        return (3 if self['panicked'].value()
                 else 2 if self['frightened'].value()
                 else 1 if self['shaken'].value() else 0)
+
+    @property
+    def condition_groups(self):
+        return [(title, [self[c] for c in cs])
+                for title, cs in self.CONDITION_GROUPS]
 
     def save(self, *args, **kwargs):
         self.instance.fatigue_degree = self.fatigue_degree

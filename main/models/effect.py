@@ -8,6 +8,7 @@ from main.models.misc import Skill
 
 class Effect(models.Model):
 
+    # TODO: Figure out which fields to index
     # The owner of the effect. This is used if the effect is stored for use by
     # multiple sheets owned by a user. Either this or sheet should be None.
     owner = models.ForeignKey(User, null=True, default=None)
@@ -222,7 +223,8 @@ class Effect(models.Model):
 
 
 class Condition(models.Model):
-
+    
+    # TODO: Figure out which fields to index
     # The owner of the effect. This is used if the effect is stored for use by
     # multiple sheets owned by a user. Either this or sheet should be None.
     owner = models.ForeignKey(User, null=True, default=None)
@@ -378,3 +380,26 @@ class Condition(models.Model):
         for sub_effect in self.sub_effect.all():
             bonus += sub_effect.total_skill_bonus(skill)
         return bonus
+
+    # Gets the save whose ability the effect overrides.
+    #   save:
+    #       the save to get bonuses for. integer (see SAVE_CHOICES).
+    # Returns a 2-tuple (ability, date added), where ability is an integer
+    # from ABILITY_CHOICES and date is a the date the effect or sub-effect
+    # was created.
+    def ultimate_save_override(self, save):
+        overrides = []
+        # Getting tuples of (ability, date added)
+        if self.save_override == save:
+            overrides.append((save, self.date))
+        # Do the same for the sub-effects
+        for sub_effect in self.sub_effect.all():
+            sub_override = sub_effect.save_override
+            if sub_override == save:
+                overrides.append((sub_override, sub_effect.date))
+        # Sort by date added
+        if overrides:
+            overrides.sort(key=lambda override: override[1])
+        # Return the most recent oone
+
+        return overrides[-1] if overrides else (None, None)
