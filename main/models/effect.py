@@ -223,7 +223,7 @@ class Effect(models.Model):
 
 
 class Condition(models.Model):
-    
+
     # TODO: Figure out which fields to index
     # The owner of the effect. This is used if the effect is stored for use by
     # multiple sheets owned by a user. Either this or sheet should be None.

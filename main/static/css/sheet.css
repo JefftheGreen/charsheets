@@ -245,7 +245,7 @@
 }
 
 .save-bonus {
-    background-color: yellow;
+    background-color: purple;
     -webkit-border-radius: .75em;
     -moz-border-radius: 1em;
     float: left;
@@ -280,4 +280,23 @@
 #save-table-labels {
     float: left;
     width: 100%;
+}
+
+#skills {
+    background-color: pink;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    float: left;
+    border: black solid thin;
+    margin: .1em;
+}
+
+.skill {
+    background-color: lightpink;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    border: black solid thin;
+    margin: .5em;
+    float: left;
+    padding: .6em
 }

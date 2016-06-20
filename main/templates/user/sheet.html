@@ -239,6 +239,18 @@
                 </div>
             </div>
         </div>
+        <div id="skills">
+            {% for skill, sub_skills in sheet.all_skills %}
+            <div class="skill" id="{{ skill }}">
+                {{ skill }}
+                {% for sub_skill in sub_skills %}
+                <div class="sub-skill" id="{{ sub_skill }}">
+                    {{ sub_skill }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
         <input type="submit" value="Save" />
     </form>
 </body>

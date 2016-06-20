@@ -122,6 +122,7 @@ class Sheet(models.Model):
     # The character's base Str, used in calculations. numeric
     @cached_property
     def base_str(self):
+        print('getting base_str')
         return self.base_ability(0)
     
     # The character's base Dex, used in calculations. numeric
@@ -178,7 +179,11 @@ class Sheet(models.Model):
     @cached_property
     def base_cha_mod(self):
         return self.ability_mod(self.base_cha)
-    
+
+    @cached_property
+    def total_ability_bonuses(self):
+        return [self.total_ability_bonus(i) for i in range(0, 6)]
+
     # The character's Str, accounting for all effects. integer
     @cached_property
     def fin_str(self):
@@ -296,6 +301,7 @@ class Sheet(models.Model):
     # The character's base Fortitude save, used in calculations. numeric
     @cached_property
     def active_effects(self):
+        print('getting active effects')
         raw_effects = list(self.effect_set.filter(active=True))
         feat_effects = []#[f.effect for f in self.feat_set.all()]
         # TODO: Figure out how to implement item properties here.
@@ -323,8 +329,19 @@ class Sheet(models.Model):
             active.append(Condition.objects.get(name='frightened'))
         elif self.fear_degree == 3:
             active.append(Condition.objects.get(name='panicked'))
-        print([a.name for a in active])
         return active
+
+    @cached_property
+    def all_skills(self):
+        skills_unsort = list(self.skill_set.filter(super_skill=None))
+        skills_unsort.sort(key=lambda s: s.name)
+        skills_sort = []
+        for s in skills_unsort:
+            sub_skills = list(self.skill_set.filter(super_skill=s))
+            sub_skills.sort(key=lambda s: s.name)
+            skills_sort.append((s, tuple(sub_skills)))
+        return tuple(skills_sort)
+
 
 
     # Parses an ability's display value into a numeric.
@@ -359,17 +376,16 @@ class Sheet(models.Model):
     #       the ability to get the modifier for. integer (see Effect model).
     # Returns an integer or None.
     def fin_ability(self, ability):
+        print('getting final {0}'.format(ability))
         # Start with the base ability
         fin_ability = self.base_ability(ability)
         # If we couldn't parse disp_ability, it's a non-ability
         if fin_ability is None:
             return None
         # Add all penalties and bonuses from effects
-        print(ability, self.total_ability_bonus(ability))
-        for bonus_type, modifiers in self.total_ability_bonus(ability).items():
+        for bonus_type, modifiers in self.total_ability_bonuses[ability].items():
             penalty, bonus = min(modifiers), max(modifiers)
             fin_ability += penalty + bonus
-        print(ability, self.base_ability(ability), fin_ability)
         return fin_ability
 
     # Gets the ability modifier for an ability. (ability - 10) / 2
@@ -572,13 +588,13 @@ class Sheet(models.Model):
     # is a range with minimum equal to the penalty of that type (0 if none)
     # and a maximum equal to the bonus of that type (0 if none).
     def total_ability_bonus(self, ability):
+        print('getting ability bonus for {0}'.format(ability))
         bonuses = {}
         # Cycle through all active effects
         for effect in self.active_effects:
             # Get the ability bonuses for the effect
             # {type: range(penalty, bonus)}
             effect_bonuses = self.effect_ability_bonus(ability, effect)
-            print(effect.name, effect_bonuses)
             # Cycle through each bonus type, adding penalties and bonuses
             for bonus_type in effect_bonuses:
                 penalty = min(effect_bonuses[bonus_type])
