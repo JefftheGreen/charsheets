@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import formsets
-from main.models import Sheet
+from main.models import *
 
 
 class SheetForm(forms.ModelForm):
@@ -86,9 +86,11 @@ class SheetForm(forms.ModelForm):
         super().save(*args, **kwargs)
 
 
-class SkillForm(forms.Form):
-
-    skill_ranks = forms.CharField(max_length=2)
+class SkillForm(forms.ModelForm):
+    class Meta:
+        model = Skill
+        fields = ['name', 'ranks']
+        widgets = {}
 
 
 class SkillFormSet(formsets.BaseFormSet):

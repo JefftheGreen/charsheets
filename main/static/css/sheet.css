@@ -313,6 +313,8 @@
 .sub-skill-spacer {
     float: left;
     width: 1em;
+    height: .1em;
     float: left;
-    border: lavender solid thin;
+    border: black solid thin;
+    margin: 0em;
 }

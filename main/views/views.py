@@ -142,8 +142,15 @@ class SheetView(View):
 
     def get(self, request, **kwargs):
         form = SheetForm(instance=self.sheet)
+        print('before factory')
+        skill_factory = modelformset_factory(Skill,
+                                             fields=['name', 'ranks_disp'],)
+        print('factorys', skill_factory)
+        skill_formset = skill_factory(queryset=self.sheet.skill_set.all())
         context = {'sheet': self.sheet,
-                   'form': form}
+                   'form': form,
+                   'skills': skill_formset}
+        print('context', context['skills'])
         return render(request, 'sheet.html', context)
 
     def post(self, request, **kwargs):

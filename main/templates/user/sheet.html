@@ -246,16 +246,19 @@
             </div>
         </div>
         <div id="skills">
-            {{ formset.management_form }}
-            {% for skill in formset %}
-            <div class="skill" id="{{ skill.name }}">
-                {{ skill }}
-                {% for sub_skill in sub_skills %}
+            {{ skills.management_form }}
+            {% for skill in skills %}
+            <div class="skill" id="{{ skill.instance.name }}">
+                {% if skill.instance.super_skill %}
                 <div class="sub-skill" id="{{ sub_skill }}">
                     <div class = "sub-skill-spacer"></div>
-                    {{ sub_skill }}
+                    {{ skill.name}}
+                    {{ skill.ranks_disp }}
                 </div>
-                {% endfor %}
+                {% else %}
+                {{ skill.name}}
+                {{ skill.ranks_disp }}
+                {% endif %}
             </div>
             {% endfor %}
         </div>

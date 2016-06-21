@@ -102,7 +102,7 @@ class Skill(models.Model):
     # Knowledge for Knowledge (arcana)
     super_skill = models.ForeignKey('self', null=True, default=None)
     # The ranks the character has in the skill
-    ranks_disp = models.CharField(max_length=200, default='')
+    ranks = models.FloatField(default=0)
     # Any miscellaneous modifier not attached to the
     misc_mod_disp = models.CharField(max_length=200, default='')
     # The multiplier for armor check penalty. Usually 0 or 1, sometimes higher.
