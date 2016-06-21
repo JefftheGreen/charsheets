@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import formsets
 from main.models import Sheet
 
 
@@ -36,6 +37,18 @@ class SheetForm(forms.ModelForm):
                   'helpless', 'incorporeal', 'invisible', 'nauseated',
                   'paralyzed', 'petrified', 'pinned', 'prone', 'sickened',
                   'stable', 'staggered', 'stunned', 'turned', 'unconscious', 'cowering']
+        widgets = {'disp_base_str':
+                       forms.TextInput(attrs={'placeholder': '10'}),
+                   'disp_base_dex':
+                       forms.TextInput(attrs={'placeholder': '10'}),
+                   'disp_base_con':
+                       forms.TextInput(attrs={'placeholder': '10'}),
+                   'disp_base_int':
+                       forms.TextInput(attrs={'placeholder': '10'}),
+                   'disp_base_wis':
+                       forms.TextInput(attrs={'placeholder': '10'}),
+                   'disp_base_cha':
+                       forms.TextInput(attrs={'placeholder': '10'})}
 
 
     def __init__(self, *args, **kwargs):
@@ -71,3 +84,12 @@ class SheetForm(forms.ModelForm):
         self.instance.fear_degree = self.fear_degree
         self.instance.save()
         super().save(*args, **kwargs)
+
+
+class SkillForm(forms.Form):
+
+    skill_ranks = forms.CharField(max_length=2)
+
+
+class SkillFormSet(formsets.BaseFormSet):
+    pass

@@ -245,7 +245,7 @@
 }
 
 .save-bonus {
-    background-color: purple;
+    background-color: yellow;
     -webkit-border-radius: .75em;
     -moz-border-radius: 1em;
     float: left;
@@ -283,20 +283,36 @@
 }
 
 #skills {
-    background-color: pink;
+    background-color: purple;
     -webkit-border-radius: .75em;
     -moz-border-radius: 1em;
     float: left;
     border: black solid thin;
     margin: .1em;
+    clear: left;
 }
 
 .skill {
-    background-color: lightpink;
+    background-color: lavender;
     -webkit-border-radius: .75em;
     -moz-border-radius: 1em;
     border: black solid thin;
     margin: .5em;
-    float: left;
     padding: .6em
+}
+
+.sub-skill {
+    background-color: lavender;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    border: black solid thin;
+    margin: .5em;
+    padding: .6em;
+}
+
+.sub-skill-spacer {
+    float: left;
+    width: 1em;
+    float: left;
+    border: lavender solid thin;
 }

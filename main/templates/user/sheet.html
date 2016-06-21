@@ -61,7 +61,13 @@
                     <span>{{ sheet.base_dex_mod }}</span>
                 </div>
                 <div class="ability-total" id="dex-total">
-                    <span>{{ sheet.fin_dex }}</span>
+                    <span>
+                        {% if sheet.fin_dex %}
+                        {{ sheet.fin_dex }}
+                        {% else %}
+                        –
+                        {% endif %}
+                    </span>
                 </div>
                 <div class="ability-total-mod" id="dex-total-mod">
                     <span>{{ sheet.fin_dex_mod }}</span>
@@ -240,11 +246,13 @@
             </div>
         </div>
         <div id="skills">
-            {% for skill, sub_skills in sheet.all_skills %}
-            <div class="skill" id="{{ skill }}">
+            {{ formset.management_form }}
+            {% for skill in formset %}
+            <div class="skill" id="{{ skill.name }}">
                 {{ skill }}
                 {% for sub_skill in sub_skills %}
                 <div class="sub-skill" id="{{ sub_skill }}">
+                    <div class = "sub-skill-spacer"></div>
                     {{ sub_skill }}
                 </div>
                 {% endfor %}
