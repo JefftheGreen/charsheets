@@ -90,7 +90,17 @@ class SkillForm(forms.ModelForm):
     class Meta:
         model = Skill
         fields = ['name', 'ranks']
-        widgets = {}
+        widgets = {'ranks': forms.NumberInput(attrs={'step': 0.5, 'min': 0})}
+
+    def __init__(self, *args, **kwargs):
+        if 'instance' in kwargs:
+            skill = kwargs['instance']
+            initial = kwargs.get('initial', {})
+            if skill.ranks.is_integer():
+                initial['ranks'] = int(skill.ranks)
+                print(skill)
+            kwargs['initial'] = initial
+        super().__init__(*args, **kwargs)
 
 
 class SkillFormSet(formsets.BaseFormSet):

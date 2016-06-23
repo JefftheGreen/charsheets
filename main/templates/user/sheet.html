@@ -62,11 +62,7 @@
                 </div>
                 <div class="ability-total" id="dex-total">
                     <span>
-                        {% if sheet.fin_dex %}
                         {{ sheet.fin_dex }}
-                        {% else %}
-                        –
-                        {% endif %}
                     </span>
                 </div>
                 <div class="ability-total-mod" id="dex-total-mod">
@@ -246,20 +242,49 @@
             </div>
         </div>
         <div id="skills">
+            <div class="skills-label" id="skills-label-header">
+                <div class="skill-name-label">Skill</div>
+                <div class="skill-ability-label">Key Ability</div>
+                <div class="skill-total-label">Total</div>
+                <div class="skill-ability-mod-label">Ab Mod</div>
+                <div class="skill-ranks-label">Ranks</div>
+                <div class="skill-misc-label">Bonus</div>
+                <div class="skill-acp-label">ACP</div>
+            </div>
             {{ skills.management_form }}
             {% for skill in skills %}
+            {% if skill.instance.super_skill %}
+            <div class="skill sub-skill" id="{{ skill.instance.name }}">
+                <div class = "sub-skill-spacer"></div>
+            {% else %}
             <div class="skill" id="{{ skill.instance.name }}">
-                {% if skill.instance.super_skill %}
-                <div class="sub-skill" id="{{ sub_skill }}">
-                    <div class = "sub-skill-spacer"></div>
-                    {{ skill.name}}
-                    {{ skill.ranks_disp }}
+            {% endif %}
+                <div class="skill-name" id="{{ skill.instance.name }}-name">
+                    {{ skill.name }}
                 </div>
-                {% else %}
-                {{ skill.name}}
-                {{ skill.ranks_disp }}
-                {% endif %}
+                <div class="skill-ability" id="{{ skill.instance.name }}-ability">
+                    (Ability)
+                </div>
+                <div class="skill-total" id="{{ skill.instance.name }}-total">
+                    (Total)
+                </div>
+                <div class="skill-ability-mod" id="{{ skill.instance.name }}-ability-mod">
+                    (Ability Mod)
+                </div>
+                <div class="skill-ranks" id="{{ skill.instance.name }}-ranks">
+                    {{ skill.ranks }}
+                </div>
+                <div class="skill-misc" id="{{ skill.instance.name }}-misc">
+                    (misc)
+                </div>
+                <div class="skill-acp" id="{{ skill.instance.name }}-acp">
+                    (ACP)
+                </div>
+            {% if skill.instance.super_skill %}
             </div>
+            {% else %}
+            </div>
+            {% endif %}
             {% endfor %}
         </div>
         <input type="submit" value="Save" />

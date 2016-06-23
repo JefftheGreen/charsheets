@@ -104,7 +104,7 @@ class Skill(models.Model):
     # The ranks the character has in the skill
     ranks = models.FloatField(default=0)
     # Any miscellaneous modifier not attached to the
-    misc_mod_disp = models.CharField(max_length=200, default='')
+    misc_mod = models.FloatField(default=0)
     # The multiplier for armor check penalty. Usually 0 or 1, sometimes higher.
     acp = models.IntegerField(default=0)
     # Is the user allowed to rename the skill.

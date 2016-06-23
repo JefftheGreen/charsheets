@@ -287,34 +287,65 @@
     -webkit-border-radius: .75em;
     -moz-border-radius: 1em;
     float: left;
+    width: 42em;
     border: black solid thin;
     margin: .1em;
-    clear: left;
 }
 
 .skill {
     background-color: lavender;
     -webkit-border-radius: .75em;
     -moz-border-radius: 1em;
-    border: black solid thin;
-    margin: .5em;
-    padding: .6em
-}
-
-.sub-skill {
-    background-color: lavender;
-    -webkit-border-radius: .75em;
-    -moz-border-radius: 1em;
-    border: black solid thin;
+    border: black thin solid;
+    float: left;
+    width: 40em;
     margin: .5em;
     padding: .6em;
+}
+
+.skill div {
+    float: left;
 }
 
 .sub-skill-spacer {
     float: left;
     width: 1em;
-    height: .1em;
-    float: left;
-    border: black solid thin;
-    margin: 0em;
+    height: 1em;
 }
+
+.skills-label {
+    float: left;
+    width: 40em;
+    background-color: lavender;
+    border: black solid thin;
+    margin: .5em;
+    padding: .6em;
+}
+
+.skills-label div {
+    float: left;
+    background-color: lavender;
+    -webkit-border-radius: .75em;
+    -moz-border-radius: 1em;
+    border: black thin solid;
+}
+
+.skill-name-label {
+    width: 15em;
+}
+
+.skill div input[type="text"] {
+    border: 0px;
+    border-bottom: medium dashed darkgrey;
+    background: none;
+    width: 13em;}
+
+.skill div input[type="number"] {
+    border: 0px;
+    border-bottom: medium dashed darkgrey;
+    background: none;
+    width: 3em;
+    text-align: center;}
+
+::-webkit-inner-spin-button { -webkit-appearance: none;}
+::-webkit-outer-spin-button { -webkit-appearance: none;}

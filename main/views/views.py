@@ -142,15 +142,12 @@ class SheetView(View):
 
     def get(self, request, **kwargs):
         form = SheetForm(instance=self.sheet)
-        print('before factory')
-        skill_factory = modelformset_factory(Skill,
-                                             fields=['name', 'ranks_disp'],)
-        print('factorys', skill_factory)
+        skill_factory = modelformset_factory(Skill, form=SkillForm,
+                                             fields=['name', 'ranks'])
         skill_formset = skill_factory(queryset=self.sheet.skill_set.all())
         context = {'sheet': self.sheet,
                    'form': form,
                    'skills': skill_formset}
-        print('context', context['skills'])
         return render(request, 'sheet.html', context)
 
     def post(self, request, **kwargs):
@@ -160,13 +157,9 @@ class SheetView(View):
         sheetform.save()
         print(self.sheet.fatigue_degree)
         new_form = SheetForm(instance=self.sheet)
-        print('before factory')
         skill_factory = modelformset_factory(Skill, form=SkillForm,
-                                             fields=['name', 'ranks_disp'],)
-        print('factorys', skill_factory)
-        skill_formset = skill_factory(queryset=Skill.objects.filter(
-            sheet=self.sheet))
-        print('formset', skill_formset)
+                                             fields=['name', 'ranks'])
+        skill_formset = skill_factory(queryset=self.sheet.skill_set.all())
         context = {'sheet': self.sheet,
                    'form': new_form,
                    'skills': skill_formset}

@@ -352,6 +352,8 @@ class Sheet(models.Model):
     # indicating a float ('[0-9]+(\.[0-9]+)*'), and None.
     def base_ability(self, ability):
         disp_ability = self.disp_abilities[ability]
+        if disp_ability == '':
+            return ''
         # If we can, just turn it into a numeric
         try:
             return int(disp_ability)
@@ -379,9 +381,13 @@ class Sheet(models.Model):
         print('getting final {0}'.format(ability))
         # Start with the base ability
         fin_ability = self.base_ability(ability)
+        # If the base is empty, so is the final
+        print(ability, fin_ability)
+        if fin_ability == '':
+            return ''
         # If we couldn't parse disp_ability, it's a non-ability
         if fin_ability is None:
-            return None
+            return "–"
         # Add all penalties and bonuses from effects
         for bonus_type, modifiers in self.total_ability_bonuses[ability].items():
             penalty, bonus = min(modifiers), max(modifiers)
