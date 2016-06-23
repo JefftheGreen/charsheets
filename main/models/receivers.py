@@ -11,7 +11,6 @@ def finished_saving(sender, **kwargs):
             created = kwargs['created']
             instance = kwargs['instance']
             skill_ids = {None:None}
-            print(created, instance)
             if created:
                 # Loop through skills that aren't subskills
                 for skill in Skill.objects.filter(id__in=DEFAULT_SKILL_IDS):

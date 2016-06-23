@@ -1,5 +1,5 @@
 from django.test import TestCase
-from main.models import Effect, Sheet, Skill
+from main.models import *
 from main.default_data import setup
 from collections import defaultdict
 
@@ -47,8 +47,8 @@ class EffectTest(TestCase):
                  'x_to_y_bonus_ability': 3,
                  'bonus_type': 1,
                  'parent_effect': parent},
-                {'save_override': 2,
-                 'override_ability': 2,
+                {'save_override': 1,
+                 'override_ability': 5,
                  'bonus_type': 1,
                  'parent_effect': parent}
                 ]
@@ -77,5 +77,5 @@ class EffectTest(TestCase):
         effect = Effect.objects.get(name='test_sub_effects')
         skill = Skill.objects.get(id=11)
         assert sheet.fin_fort == 10
-        assert sheet.fin_ref == 9
-        assert sheet.fin_will == 7
+        assert sheet.fin_ref == 13
+        assert sheet.fin_will == 9

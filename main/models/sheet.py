@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from main.default_data import DEFAULT_SAVE_ABILITIES, DEFAULT_CONDITION_EFFECTS
 from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
-from main.models.effect import Condition
+from main.models import Condition
 from django.utils.functional import cached_property
 import re
 
@@ -122,7 +122,6 @@ class Sheet(models.Model):
     # The character's base Str, used in calculations. numeric
     @cached_property
     def base_str(self):
-        print('getting base_str')
         return self.base_ability(0)
     
     # The character's base Dex, used in calculations. numeric
@@ -301,7 +300,6 @@ class Sheet(models.Model):
     # The character's base Fortitude save, used in calculations. numeric
     @cached_property
     def active_effects(self):
-        print('getting active effects')
         raw_effects = list(self.effect_set.filter(active=True))
         feat_effects = []#[f.effect for f in self.feat_set.all()]
         # TODO: Figure out how to implement item properties here.
@@ -378,11 +376,9 @@ class Sheet(models.Model):
     #       the ability to get the modifier for. integer (see Effect model).
     # Returns an integer or None.
     def fin_ability(self, ability):
-        print('getting final {0}'.format(ability))
         # Start with the base ability
         fin_ability = self.base_ability(ability)
         # If the base is empty, so is the final
-        print(ability, fin_ability)
         if fin_ability == '':
             return ''
         # If we couldn't parse disp_ability, it's a non-ability
@@ -594,7 +590,6 @@ class Sheet(models.Model):
     # is a range with minimum equal to the penalty of that type (0 if none)
     # and a maximum equal to the bonus of that type (0 if none).
     def total_ability_bonus(self, ability):
-        print('getting ability bonus for {0}'.format(ability))
         bonuses = {}
         # Cycle through all active effects
         for effect in self.active_effects:
@@ -693,6 +688,6 @@ class Sheet(models.Model):
         # Add the default
         abilities.append(DEFAULT_SAVE_ABILITIES[save])
         # Get the save override with the highest modifier.
-        print('abilities', abilities)
+        print('save', save, 'abilities', abilities)
         abilities.sort(key=lambda a: self.fin_ability(a))
         return abilities[-1]
