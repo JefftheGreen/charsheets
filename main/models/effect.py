@@ -384,22 +384,16 @@ class Condition(models.Model):
     # Gets the save whose ability the effect overrides.
     #   save:
     #       the save to get bonuses for. integer (see SAVE_CHOICES).
-    # Returns a 2-tuple (ability, date added), where ability is an integer
-    # from ABILITY_CHOICES and date is a the date the effect or sub-effect
-    # was created.
+    # Returns a list of of integers from ABILITY_CHOICES.
     def ultimate_save_override(self, save):
-        overrides = []
-        # Getting tuples of (ability, date added)
-        if self.save_override == save:
-            overrides.append((save, self.date))
+        print('override_ability', self.override_ability, 'save_override', self.save_override, 'save', save)
+        # Add save override if for the given save
+        overrides = ([self.override_ability] if self.save_override == save
+                     else [])
         # Do the same for the sub-effects
         for sub_effect in self.sub_effect.all():
             sub_override = sub_effect.save_override
-            if sub_override == save:
-                overrides.append((sub_override, sub_effect.date))
-        # Sort by date added
-        if overrides:
-            overrides.sort(key=lambda override: override[1])
-        # Return the most recent oone
-
-        return overrides[-1] if overrides else (None, None)
+            override_ability = sub_effect.override_ability
+            if sub_override == save and override_ability not in overrides:
+                overrides.append(sub_override)
+        return overrides

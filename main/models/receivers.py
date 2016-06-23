@@ -6,16 +6,13 @@ from .misc import Skill
 
 @receiver(post_save)
 def finished_saving(sender, **kwargs):
-    print('received signal')
     if sender == Sheet:
-        print('sender is sheet')
         try:
             created = kwargs['created']
             instance = kwargs['instance']
             skill_ids = {None:None}
             print(created, instance)
             if created:
-                print('looping through skills')
                 # Loop through skills that aren't subskills
                 for skill in Skill.objects.filter(id__in=DEFAULT_SKILL_IDS):
                     old_id = skill.id

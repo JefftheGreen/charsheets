@@ -1,13 +1,13 @@
 from django.test import TestCase
 from main.models import Effect, Sheet, Skill
-from main.default_data import main
+from main.default_data import setup
 from collections import defaultdict
 
 
 class EffectTest(TestCase):
     
     def setUp(self):
-        main()
+        setup()
         sheet = Sheet(owner_id=0, disp_base_str='10', disp_base_dex='12',
                       disp_base_con='14', disp_base_int='16',
                       disp_base_wis='18', disp_base_cha='20',

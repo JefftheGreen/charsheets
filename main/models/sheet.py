@@ -688,13 +688,11 @@ class Sheet(models.Model):
     # the save ability, the default save ability.
     def ultimate_save_ability(self, save):
         # Get the save override from all effects that have one.
-        abilities = [effect.ultimate_save_override(save)
-                     for effect in self.active_effects]
-        abilities=list(filter((None,None).__ne__, abilities))
-        # Get the save override from the most recently added effect.
-        try:
-            abilities.sort(key=lambda t: t[1])
-            return abilities[-1][0]
-        # There's no override; get the default
-        except (IndexError, TypeError):
-            return DEFAULT_SAVE_ABILITIES[save]
+        abilities = list({s for effect in self.active_effects
+                          for s in effect.ultimate_save_override(save)})
+        # Add the default
+        abilities.append(DEFAULT_SAVE_ABILITIES[save])
+        # Get the save override with the highest modifier.
+        print('abilities', abilities)
+        abilities.sort(key=lambda a: self.fin_ability(a))
+        return abilities[-1]
